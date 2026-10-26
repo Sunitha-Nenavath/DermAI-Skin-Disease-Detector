@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DermAI — UI Wireframes</title>
+  <style>
+    :root {
+      --teal: #0E9F8E;
+      --teal-light: #13BBA8;
+      --navy: #0B1F3A;
+      --navy-mid: #1A3A5C;
+      --light-grey: #F4F6F9;
+      --border: #D1D9E6;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --text-light: #7F8C8D;
+      --success: #27AE60;
+      --warning: #F39C12;
+      --danger: #E74C3C;
+      --shadow: 0 2px 12px rgba(11,31,58,0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #E8ECF0;
+      color: var(--text);
+      padding: 24px;
+    }
+    h1.master {
+      text-align: center;
+      color: var(--navy);
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    .notice {
+      background: #FFF8E1;
+      border-left: 4px solid var(--warning);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #7A5500;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      max-width: 900px;
+      margin-inline: auto;
+    }
+    /* ── Grid of wireframes ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 28px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .frame {
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .frame-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .frame-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .frame-header .dot.r { background: #E74C3C; }
+    .frame-header .dot.y { background: #F39C12; }
+    .frame-header .dot.g { background: #27AE60; }
+    .frame-body { padding: 20px; flex: 1; }
+
+    /* ── Shared components ── */
+    .topbar {
+      background: var(--navy);
+      color: var(--white);
+      padding: 10px 16px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .topbar .logo { color: var(--teal); font-size: 16px; }
+    .topbar .nav { display: flex; gap: 16px; font-size: 12px; color: #aab; cursor: pointer; }
+    .topbar .nav span:hover { color: var(--teal); }
+
+    .sidebar-layout { display: flex; gap: 16px; }
+    .sidebar {
+      width: 140px;
+      min-width: 140px;
+      background: var(--light-grey);
+      border-radius: 8px;
+      padding: 12px 8px;
+    }
+    .sidebar .menu-item {
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      color: var(--text-light);
+    }
+    .sidebar .menu-item.active {
+      background: var(--teal);
+      color: white;
+      font-weight: 600;
+    }
+    .sidebar .menu-item:hover:not(.active) { background: #DFE5ED; }
+
+    .main-content { flex: 1; min-width: 0; }
+
+    /* ── Form elements ── */
+    .field-group { margin-bottom: 14px; }
+    .field-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 4px; }
+    .field-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--light-grey);
+    }
+    .field-input:focus { outline: none; border-color: var(--teal); }
+    .btn {
+      display: inline-block;
+      padding: 9px 20px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .2s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--teal); color: white; }
+    .btn-outline { background: transparent; color: var(--teal); border: 1.5px solid var(--teal); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 5px 12px; font-size: 11px; }
+    .btn-full { width: 100%; text-align: center; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--light-grey);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+    .card-sub { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+    /* ── Stat tiles ── */
+    .stats-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .stat-tile {
+      background: var(--light-grey);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 90px;
+    }
+    .stat-tile .val { font-size: 22px; font-weight: 700; color: var(--navy); }
+    .stat-tile .lbl { font-size: 11px; color: var(--text-light); }
+    .stat-tile.accent { border-left: 3px solid var(--teal); }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .badge-good { background: #D4EFDF; color: var(--success); }
+    .badge-acceptable { background: #FDEBD0; color: var(--warning); }
+    .badge-poor { background: #FDEDEC; color: var(--danger); }
+    .badge-pending { background: #EAF2FF; color: #2980B9; }
+    .badge-reviewed { background: #D4EFDF; color: var(--success); }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2.5px dashed var(--teal);
+      border-radius: 10px;
+      padding: 28px;
+      text-align: center;
+      background: #F0FBFA;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .upload-zone .icon { font-size: 36px; }
+    .upload-zone p { font-size: 13px; color: var(--text-light); margin-top: 6px; }
+    .upload-zone .hint { font-size: 11px; color: #aab; margin-top: 4px; }
+
+    /* ── Image preview ── */
+    .img-preview {
+      background: var(--light-grey);
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .img-preview .img-slot {
+      height: 120px;
+      background: linear-gradient(135deg, #C8E8E5 0%, #B2DFDB 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--teal);
+    }
+    .img-preview .img-meta { padding: 8px 10px; font-size: 11px; color: var(--text-light); }
+
+    /* ── Before/After ── */
+    .before-after { display: flex; gap: 10px; }
+    .ba-panel { flex: 1; }
+    .ba-panel .ba-title { font-size: 11px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+    .ba-img {
+      height: 100px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #C8E8E5 0%, #E8D5C4 100%);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    /* ── Table ── */
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .mini-table th {
+      background: var(--navy);
+      color: white;
+      padding: 6px 10px;
+      text-align: left;
+      font-size: 11px;
+    }
+    .mini-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+    .mini-table tr:hover td { background: var(--light-grey); }
+
+    /* ── Footer notice ── */
+    .footer-notice {
+      background: var(--navy);
+      color: #89A0B8;
+      text-align: center;
+      padding: 6px 12px;
+      font-size: 10px;
+      border-radius: 0 0 8px 8px;
+      margin-top: 14px;
+    }
+    .footer-notice strong { color: var(--teal); }
+
+    /* ── Alert ── */
+    .alert { padding: 10px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; }
+    .alert-error { background: #FDEDEC; border-left: 3px solid var(--danger); color: var(--danger); }
+    .alert-warning { background: #FEF9E7; border-left: 3px solid var(--warning); color: #856404; }
+    .alert-success { background: #D4EFDF; border-left: 3px solid var(--success); color: #1a6b3a; }
+
+    .separator { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+    .role-pill {
+      display: inline-block;
+      background: var(--navy-mid);
+      color: var(--teal);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<h1 class="master">🩺 DermAI — UI Wireframes</h1>
+<p class="subtitle">Milestone 1 · Medical-grade UI · Teal #0E9F8E + Navy #0B1F3A</p>
+
+<div class="notice">
+  ⚠️ <strong>All screens include the mandatory notice:</strong> "AI-assisted analysis, not a standalone medical diagnosis." — shown in footer of every page.
+</div>
+
+<div class="grid">
+
+  <!-- ════════════════════════════════ 1. LOGIN ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 1 — Login
+    </div>
+    <div class="frame-body">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="font-size:32px;">🩺</div>
+        <div style="font-size:20px; font-weight:700; color:var(--navy);">DermAI</div>
+        <div style="font-size:12px; color:var(--text-light);">Skin Disease Detector</div>
+      </div>
+
+      <div class="field-group">
+        <label>Email Address</label>
+        <div class="field-input" style="color:var(--text-light);">you@hospital.com</div>
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <div class="field-input" style="color:var(--text-light);">••••••••••</div>
+      </div>
+      <div style="text-align:right; font-size:11px; color:var(--teal); margin-bottom:12px; cursor:pointer;">Forgot password?</div>
+      <button class="btn btn-primary btn-full">Sign In</button>
+      <div class="separator"></div>
+      <div style="text-align:center; font-size:12px; color:var(--text-light);">
+        No account? <span style="color:var(--teal); cursor:pointer; font-weight:600;">Register here</span>
+      </div>
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 2. REGISTER ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 2 — Register
+    </div>
+    <div class="frame-body">
+      <div style="font-size:16px; font-weight:700; color:var(--navy); margin-bottom:16px;">Create Account</div>
+
+      <div class="field-group">
+        <label>Full Name</label>
+        <div class="field-input" style="color:var(--text-light);">Dr. Jane Smith</div>
+      </div>
+      <div class="field-group">
+        <label>Email Address</label>
+        <div class="field-input" style="color:var(--text-light);">jane@clinic.com</div>
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <div class="field-input" style="color:var(--text-light);">min. 8 characters</div>
+      </div>
+      <div class="field-group">
+        <label>Role</label>
+        <div class="field-input" style="color:var(--text-light);">▼ Clinician</div>
+      </div>
+      <div class="alert alert-warning" style="margin-top:0;">
+        Role assignment is verified by an admin before access is granted.
+      </div>
+      <button class="btn btn-primary btn-full">Create Account</button>
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 3. DASHBOARD ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 3 — Dashboard
+    </div>
+    <div class="frame-body">
+      <div class="topbar">
+        <span class="logo">🩺 DermAI</span>
+        <span class="nav">
+          <span class="active" style="color:var(--teal);">Dashboard</span>
+          <span>Cases</span>
+          <span>Profile</span>
+        </span>
+        <span class="role-pill">CLINICIAN</span>
+      </div>
+
+      <div style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:12px;">Good morning, Dr. Smith 👋</div>
+
+      <div class="stats-row">
+        <div class="stat-tile accent"><div class="val">24</div><div class="lbl">Total Cases</div></div>
+        <div class="stat-tile accent"><div class="val">8</div><div class="lbl">Pending Review</div></div>
+        <div class="stat-tile accent"><div class="val">47</div><div class="lbl">Images Uploaded</div></div>
+        <div class="stat-tile accent"><div class="val">3</div><div class="lbl">This Week</div></div>
+      </div>
+
+      <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:8px;">Latest Cases</div>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="card-title">PT-2024-089 — Left arm lesion</div>
+            <div class="card-sub">2 hours ago · 3 images</div>
+          </div>
+          <span class="badge badge-pending">PENDING</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="card-title">PT-2024-088 — Back lesion</div>
+            <div class="card-sub">Yesterday · 5 images</div>
+          </div>
+          <span class="badge badge-reviewed">REVIEWED</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="card-title">PT-2024-087 — Facial lesion</div>
+            <div class="card-sub">3 days ago · 2 images</div>
+          </div>
+          <span class="badge badge-reviewed">REVIEWED</span>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-top:8px;">View All Cases →</button>
+
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 4. CASE LIST ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 4 — Case List
+    </div>
+    <div class="frame-body">
+      <div class="topbar">
+        <span class="logo">🩺 DermAI</span>
+        <span class="nav"><span>Dashboard</span><span class="active" style="color:var(--teal);">Cases</span></span>
+        <span class="role-pill">CLINICIAN</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="font-size:14px; font-weight:700; color:var(--navy);">All Cases</div>
+        <button class="btn btn-primary btn-sm">+ New Case</button>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <div class="field-input" style="flex:1; color:var(--text-light); font-size:12px;">🔍 Search cases...</div>
+        <div class="field-input" style="width:110px; color:var(--text-light); font-size:12px;">▼ Status</div>
+      </div>
+
+      <table class="mini-table">
+        <thead>
+          <tr><th>Case Code</th><th>Location</th><th>Images</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span style="color:var(--teal); font-weight:600;">PT-2024-089</span></td>
+            <td>Left arm</td><td>3</td>
+            <td><span class="badge badge-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--teal); font-weight:600;">PT-2024-088</span></td>
+            <td>Back</td><td>5</td>
+            <td><span class="badge badge-reviewed">REVIEWED</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--teal); font-weight:600;">PT-2024-087</span></td>
+            <td>Face</td><td>2</td>
+            <td><span class="badge badge-reviewed">REVIEWED</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--teal); font-weight:600;">PT-2024-086</span></td>
+            <td>Chest</td><td>1</td>
+            <td><span class="badge badge-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td><span style="color:var(--teal); font-weight:600;">PT-2024-085</span></td>
+            <td>Scalp</td><td>4</td>
+            <td><span class="badge" style="background:#EEE;color:#999;">DRAFT</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size:11px; color:var(--text-light); margin-top:8px; text-align:right;">Showing 5 of 24 cases</div>
+
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 5. NEW CASE FORM ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 5 — New Case Form
+    </div>
+    <div class="frame-body">
+      <div class="topbar">
+        <span class="logo">🩺 DermAI</span>
+        <span style="font-size:12px; color:#aab;">← Back to Cases</span>
+        <span class="role-pill">CLINICIAN</span>
+      </div>
+
+      <div style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:16px;">Create New Case</div>
+
+      <div class="field-group">
+        <label>Case Title</label>
+        <div class="field-input" style="color:var(--text-light);">e.g. Left forearm lesion – 6 months</div>
+      </div>
+      <div class="field-group">
+        <label>Patient Code (de-identified)</label>
+        <div class="field-input" style="color:var(--text-light);">e.g. PT-2024-090</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <div class="field-group" style="flex:1;">
+          <label>Patient Age</label>
+          <div class="field-input" style="color:var(--text-light);">e.g. 45</div>
+        </div>
+        <div class="field-group" style="flex:1;">
+          <label>Gender</label>
+          <div class="field-input" style="color:var(--text-light);">▼ Select</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Body Location</label>
+        <div class="field-input" style="color:var(--text-light);">▼ Back / Arm / Face / Chest / Other…</div>
+      </div>
+      <div class="field-group">
+        <label>Clinical Notes (optional)</label>
+        <div class="field-input" style="min-height:60px; color:var(--text-light);">Lesion noticed 6 months ago, slowly growing...</div>
+      </div>
+      <div class="alert alert-warning">
+        ⚠️ Do not enter any identifying information (name, DOB, contact). Use de-identified codes only.
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary" style="flex:2;">Create Case & Upload Images →</button>
+      </div>
+
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 6. IMAGE UPLOAD ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 6 — Image Upload with Quality Result
+    </div>
+    <div class="frame-body">
+      <div class="topbar">
+        <span class="logo">🩺 DermAI</span>
+        <span style="font-size:12px; color:#aab;">Case PT-2024-090</span>
+        <span class="role-pill">PATIENT</span>
+      </div>
+
+      <div style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:12px;">Upload Skin Image</div>
+
+      <div class="upload-zone">
+        <div class="icon">📸</div>
+        <p>Drag & drop your photo here, or click to select</p>
+        <div class="hint">JPG / PNG · Max 10 MB · Min 224×224 px</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;">📷 Use Camera</button>
+      </div>
+
+      <!-- After upload — GOOD quality -->
+      <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:8px;">Uploaded Image</div>
+      <div class="img-preview">
+        <div class="img-slot">🖼️</div>
+        <div class="img-meta">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span>lesion_photo.jpg · 2.1 MB · 3024×4032 px</span>
+            <span class="badge badge-good">✅ GOOD</span>
+          </div>
+          <div style="margin-top:6px; font-size:11px; color:var(--text-light);">
+            Blur score: 142 &nbsp;|&nbsp; Brightness: 134 &nbsp;|&nbsp; Contrast: 52
+          </div>
+        </div>
+      </div>
+
+      <!-- POOR quality example -->
+      <div class="alert alert-error">
+        <strong>❌ Image Quality: Poor</strong><br/>
+        Reason: Image is too blurry (score: 23 / threshold: 50). Please retake the photo in better lighting, holding the phone steady.
+      </div>
+      <button class="btn btn-danger btn-sm">🔁 Retake Photo</button>
+
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button class="btn btn-outline" style="flex:1;">← Back</button>
+        <button class="btn btn-primary" style="flex:2;">Submit & Analyze →</button>
+      </div>
+
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 7. IMAGE DETAIL ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 7 — Image Detail (Original vs Preprocessed)
+    </div>
+    <div class="frame-body">
+      <div class="topbar">
+        <span class="logo">🩺 DermAI</span>
+        <span style="font-size:12px; color:#aab;">Case PT-2024-090 › Image #3</span>
+        <span class="role-pill">CLINICIAN</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="font-size:14px; font-weight:700; color:var(--navy);">Image Analysis</div>
+        <span class="badge badge-good">✅ GOOD</span>
+      </div>
+
+      <div class="before-after" style="margin-bottom:14px;">
+        <div class="ba-panel">
+          <div class="ba-title">ORIGINAL</div>
+          <div class="ba-img">🖼️</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px;">3024×4032 px · 2.1 MB</div>
+        </div>
+        <div class="ba-panel">
+          <div class="ba-title">PREPROCESSED (224×224)</div>
+          <div class="ba-img" style="background: linear-gradient(135deg, #A8DFDA, #D4E6D0);">🔬</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px;">CLAHE + Hair removal + Normalized</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:6px;">Quality Metrics</div>
+      <table class="mini-table" style="margin-bottom:12px;">
+        <thead><tr><th>Metric</th><th>Value</th><th>Threshold</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Blur (Laplacian)</td><td>142.3</td><td>≥ 100</td><td><span class="badge badge-good">Good</span></td></tr>
+          <tr><td>Brightness (mean)</td><td>134</td><td>80–200</td><td><span class="badge badge-good">Good</span></td></tr>
+          <tr><td>Contrast (std)</td><td>52.1</td><td>≥ 40</td><td><span class="badge badge-good">Good</span></td></tr>
+          <tr><td>Resolution</td><td>3024×4032</td><td>≥ 224px</td><td><span class="badge badge-good">Good</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-warning">
+        ⏳ <strong>AI Analysis Pending</strong> — Classification model available in Milestone 2.
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm">⬇ Download Original</button>
+        <button class="btn btn-outline btn-sm">⬇ Download Preprocessed</button>
+        <button class="btn btn-primary btn-sm">Add Clinical Note →</button>
+      </div>
+
+      <div class="footer-notice"><strong>AI-assisted analysis, not a standalone medical diagnosis.</strong></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ 8. MOBILE VIEW ════════════════════════════════ -->
+  <div class="frame">
+    <div class="frame-header">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      Screen 8 — Mobile View (360px) — Dashboard
+    </div>
+    <div class="frame-body">
+      <div style="max-width:360px; margin:0 auto; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+        <div style="background:var(--navy); padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="color:var(--teal); font-weight:700; font-size:15px;">🩺 DermAI</span>
+          <span style="color:white; font-size:18px; cursor:pointer;">☰</span>
+        </div>
+        <div style="padding:14px; background:var(--light-grey);">
+          <div style="font-size:13px; font-weight:700; color:var(--navy); margin-bottom:10px;">Hello, Dr. Smith 👋</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+            <div class="stat-tile accent"><div class="val" style="font-size:18px;">24</div><div class="lbl">Cases</div></div>
+            <div class="stat-tile accent"><div class="val" style="font-size:18px;">8</div><div class="lbl">Pending</div></div>
+          </div>
+          <button class="btn btn-primary btn-full" style="margin-bottom:8px; font-size:13px;">📸 Upload New Image</button>
+          <button class="btn btn-outline btn-full" style="font-size:13px;">📋 View All Cases</button>
+          <div style="font-size:11px; font-weight:700; color:var(--navy); margin:12px 0 6px;">Latest</div>
+          <div class="card" style="padding:8px;">
+            <div class="card-title" style="font-size:12px;">PT-2024-089 — Left arm</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+              <div class="card-sub" style="font-size:10px;">2 hours ago</div>
+              <span class="badge badge-pending">PENDING</span>
+            </div>
+          </div>
+          <div class="card" style="padding:8px;">
+            <div class="card-title" style="font-size:12px;">PT-2024-088 — Back</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+              <div class="card-sub" style="font-size:10px;">Yesterday</div>
+              <span class="badge badge-reviewed">REVIEWED</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--navy); padding:6px 12px; text-align:center; font-size:9px; color:#89A0B8;">
+          <strong style="color:var(--teal);">AI-assisted analysis, not a standalone medical diagnosis.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center; margin-top:32px; font-size:12px; color:var(--text-light); padding-bottom:24px;">
+  DermAI Wireframes — Milestone 1 · Colors: Teal <code>#0E9F8E</code> · Navy <code>#0B1F3A</code> · Grey <code>#F4F6F9</code><br/>
+  <strong style="color:var(--navy);">AI-assisted analysis, not a standalone medical diagnosis.</strong>
+</div>
+
+</body>
+</html>

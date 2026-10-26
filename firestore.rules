@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? getUserData().role
+        : 'patient';
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (getUserRole() == 'admin' || request.auth.token.email == 'sunithanenavath566@gmail.com');
+    }
+
+    function isClinician() {
+      return isSignedIn() && (getUserRole() == 'clinician' || isAdmin());
+    }
+
+    function isResearcher() {
+      return isSignedIn() && (getUserRole() == 'researcher' || isClinician() || isAdmin());
+    }
+
+    function isMlEngineer() {
+      return isSignedIn() && (getUserRole() == 'ml_engineer' || isAdmin());
+    }
+
+    // Connection test document
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // 1. Users collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 2. Clinical Cases collection
+    match /cases/{caseId} {
+      // Patients read only their own cases; Clinicians, Researchers, Admins read all
+      allow get: if isSignedIn() && (resource.data.owner_id == request.auth.uid || isClinician() || isResearcher() || isAdmin());
+      allow list: if isSignedIn() && (
+        (getUserRole() == 'patient' && resource.data.owner_id == request.auth.uid) ||
+        isClinician() || isResearcher() || isAdmin()
+      );
+
+      // Patients can create cases for themselves; Clinicians and Admins can create cases
+      allow create: if isSignedIn() && (
+        request.resource.data.owner_id == request.auth.uid || isClinician() || isAdmin()
+      );
+
+      // Clinicians can append notes; Owners can update details; Admins have full update
+      allow update: if isSignedIn() && (
+        (resource.data.owner_id == request.auth.uid && request.resource.data.owner_id == resource.data.owner_id) ||
+        isClinician() ||
+        isAdmin()
+      );
+
+      // Purge/delete restricted strictly to Administrators
+      allow delete: if isAdmin();
+    }
+
+    // 3. AI Screening Analyses
+    match /analyses/{analysisId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isClinician() || isMlEngineer() || isAdmin();
+      allow update: if isClinician() || isMlEngineer() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 4. Model Registry & Checkpoints
+    match /models/{modelId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isMlEngineer() || isAdmin();
+    }
+
+    // 5. In-App Notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    // 6. HIPAA Audit Logs
+    match /audit_logs/{logId} {
+      // Any verified user session can write audit entries
+      allow create: if isSignedIn();
+      // Only Administrators can read audit logs
+      allow read: if isAdmin();
+      // Immutability: Audit logs can never be altered or deleted
+      allow update, delete: if false;
+    }
+  }
+}

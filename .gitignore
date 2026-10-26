@@ -1,0 +1,62 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# .gitignore — DermAI
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ── Secrets (NEVER commit) ────────────────────────────────────────────────────
+.env
+*.env.local
+*.pem
+*.key
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.whl
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+.npm
+web/dist/
+web/.vite/
+*.tsbuildinfo
+
+# ── Data (large files, real patient data must NEVER be committed) ─────────────
+data/raw/
+data/splits/*.csv
+data/splits/class_weights.json
+backend/storage/
+
+# ── ML Models ────────────────────────────────────────────────────────────────
+ml/models/*.pth
+ml/models/*.pt
+ml/models/*.onnx
+ml/models/*.h5
+ml/models/*.pkl
+
+# ── IDE / OS ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Docker ───────────────────────────────────────────────────────────────────
+*.log
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/

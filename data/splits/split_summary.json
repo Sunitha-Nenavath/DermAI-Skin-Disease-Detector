@@ -1,0 +1,58 @@
+{
+  "total_images": 10015,
+  "total_unique_lesions": 7470,
+  "splits": {
+    "train": {
+      "images": 7014,
+      "lesions": 5230,
+      "pct_images": 70.03,
+      "class_counts": {
+        "nv": 4667,
+        "mel": 798,
+        "bkl": 771,
+        "bcc": 375,
+        "akiec": 225,
+        "vasc": 101,
+        "df": 77
+      }
+    },
+    "val": {
+      "images": 1499,
+      "lesions": 1120,
+      "pct_images": 14.97,
+      "class_counts": {
+        "nv": 1018,
+        "bkl": 162,
+        "mel": 155,
+        "bcc": 74,
+        "akiec": 51,
+        "vasc": 20,
+        "df": 19
+      }
+    },
+    "test": {
+      "images": 1502,
+      "lesions": 1120,
+      "pct_images": 15.0,
+      "class_counts": {
+        "nv": 1020,
+        "bkl": 166,
+        "mel": 160,
+        "bcc": 65,
+        "akiec": 51,
+        "vasc": 21,
+        "df": 19
+      }
+    }
+  },
+  "balanced_class_weights_train": {
+    "nv": 0.2147,
+    "mel": 1.2556,
+    "bkl": 1.2996,
+    "bcc": 2.672,
+    "akiec": 4.4533,
+    "vasc": 9.9208,
+    "df": 13.013
+  },
+  "leakage_verified": true
+}

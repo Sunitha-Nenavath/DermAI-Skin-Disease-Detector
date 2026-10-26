@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermAI — Milestone 1 Project Presentation (10 Slides)</title>
+  <style>
+    :root {
+      --teal: #0E9F8E;
+      --teal-dark: #0B7C6E;
+      --teal-light: #E6F7F5;
+      --navy: #0B1F3A;
+      --navy-light: #16365C;
+      --bg: #0F172A;
+      --card-bg: #FFFFFF;
+      --text: #0B1F3A;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --amber: #D97706;
+      --rose: #DC2626;
+      --emerald: #059669;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Clinical Disclaimer Strip */
+    .disclaimer-strip {
+      background: #FFFBEB;
+      color: #92400E;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      padding: 6px 16px;
+      border-bottom: 1px solid #FDE68A;
+      z-index: 100;
+    }
+
+    /* Top control bar */
+    .deck-header {
+      background: var(--navy);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .badge-pill {
+      background: var(--teal);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+    .btn-active {
+      background: var(--teal);
+    }
+
+    /* Presentation Slide Area */
+    .deck-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1080px;
+      height: 620px;
+      background: var(--card-bg);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 40px 48px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      flex-direction: column;
+      justify-content: space-between;
+      animation: slideIn 0.25s ease-out;
+      position: relative;
+      overflow-y: auto;
+    }
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: scale(0.985); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Slide Typography */
+    .slide-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal-dark);
+      margin-bottom: 4px;
+    }
+    .slide-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      line-height: 1.25;
+    }
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+
+    /* Grid Layouts for Slides */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .card-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+    }
+    .card-box-accent {
+      background: var(--teal-light);
+      border: 1px solid #A7F3D0;
+      border-radius: 8px;
+      padding: 16px 20px;
+    }
+    .box-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    ul.check-list {
+      list-style: none;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #334155;
+    }
+    ul.check-list li {
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 20px;
+    }
+    ul.check-list li::before {
+      content: "✓";
+      color: var(--teal-dark);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    /* Interactive Speaker Notes Drawer */
+    .notes-drawer {
+      background: #0B1F3A;
+      border-top: 2px solid var(--teal);
+      padding: 12px 24px;
+      height: 140px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: #CBD5E1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .notes-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .notes-content {
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    /* Print styles */
+    @media print {
+      body { background: #fff; height: auto; overflow: visible; }
+      .deck-header, .notes-drawer, .disclaimer-strip { display: none; }
+      .deck-container { padding: 0; display: block; }
+      .slide {
+        display: flex !important;
+        page-break-after: always;
+        height: 100vh;
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Disclaimer Header -->
+  <div class="disclaimer-strip">
+    Notice: AI-assisted analysis, not a standalone medical diagnosis. For clinical decision-support and screening research only.
+  </div>
+
+  <!-- Top Controller Bar -->
+  <header class="deck-header">
+    <div class="brand-tag">
+      <span>DermAI Presentation Deck</span>
+      <span class="badge-pill">Milestone 1</span>
+    </div>
+    <div class="nav-controls">
+      <span id="slideIndicator" style="font-size: 13px; font-weight: 600; font-family: monospace;">Slide 1 / 10</span>
+      <button class="btn" onclick="prevSlide()">◀ Previous</button>
+      <button class="btn" onclick="nextSlide()">Next ▶</button>
+      <button class="btn" onclick="toggleNotes()">Toggle Speaker Script</button>
+      <button class="btn" onclick="window.print()">Print / PDF</button>
+    </div>
+  </header>
+
+  <!-- Slide Canvas -->
+  <main class="deck-container">
+
+    <!-- SLIDE 1: Title & Executive Summary -->
+    <section class="slide active" data-slide="1" data-notes="Good morning evaluators. Today I am proud to present DermAI: Skin Disease Detector from Mobile Images Using Deep Learning. In this presentation, I will review the completion of Milestone 1: project initialization, dataset diagnostics, and core medical pipeline setup. Notice our mandatory disclaimer on every slide: 'AI-assisted analysis, not a standalone medical diagnosis.' DermAI is an automated decision-support system to assist clinicians and patients, not an autonomous replacement for clinical examination.">
+      <div>
+        <div class="slide-kicker">Milestone 1 · Project Defense Presentation</div>
+        <h1 class="slide-title" style="font-size: 34px; margin-bottom: 8px;">DermAI: Skin Disease Detector from Mobile Images Using Deep Learning</h1>
+        <div style="font-size: 15px; color: var(--teal-dark); font-weight: 600;">Project Initialization, Dataset Diagnostics & Core Medical Pipeline Setup</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="margin-top: 20px;">
+          <div class="card-box-accent">
+            <div class="box-title" style="color: var(--teal-dark);">Core System Mission</div>
+            <p style="font-size: 13px; color: #1E293B; line-height: 1.6;">
+              To engineer an automated dermatological screening and decision-support system capable of taking real-world mobile smartphone lesion images, evaluating intake fidelity, neutralizing artifacts, and delivering clinically interpretable deep learning predictions.
+            </p>
+          </div>
+          <div class="card-box">
+            <div class="box-title">Milestone 1 Scope Summary</div>
+            <ul class="check-list">
+              <li><strong>Dataset Foundations</strong>: 10,015 HAM10000 images analyzed.</li>
+              <li><strong>Zero Leakage</strong>: Grouped stratified splitting by <code>lesion_id</code>.</li>
+              <li><strong>Pre-Inference Quality Gate</strong>: Blur, luminance, and contrast validation.</li>
+              <li><strong>Medical Preprocessing</strong>: DullRazor hair removal and L-channel CLAHE.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Presenter: Full-Stack & ML Engineering Team</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 1 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Clinical Problem & Mobile Gap -->
+    <section class="slide" data-slide="2" data-notes="Skin disease is a massive global burden. Melanoma survival exceeds 98% when caught early, but drops below 30% when metastatic. However, patients face 3 to 6-month wait times to see dermatologists. Furthermore, there is a severe domain shift: academic models are trained on pristine dermoscopic images taken with uniform immersion lenses, whereas real patients take smartphone photos with blur, bad lighting, and hair occlusions. DermAI bridges this exact gap.">
+      <div>
+        <div class="slide-kicker">Clinical Motivation & Challenges</div>
+        <h2 class="slide-title">The Clinical Urgency & The Mobile Dermatology Gap</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card-box" style="border-left: 4px solid var(--rose);">
+            <div class="box-title" style="color: var(--rose);">The Clinical Dilemma</div>
+            <ul style="font-size: 13px; line-height: 1.7; color: #334155; padding-left: 18px;">
+              <li><strong>Melanoma Urgency</strong>: 5-year survival drops from &gt;98% at stage 1 to &lt;30% once metastatic.</li>
+              <li><strong>Access Bottleneck</strong>: Specialist wait times range from 3 to 6 months in public healthcare.</li>
+              <li><strong>Diagnostic Inequality</strong>: Early detection requires frequent monitoring of evolving moles.</li>
+            </ul>
+          </div>
+
+          <div class="card-box" style="border-left: 4px solid var(--amber);">
+            <div class="box-title" style="color: var(--amber);">The Acquisition Domain Gap</div>
+            <div style="font-size: 12px; line-height: 1.6; color: #334155;">
+              <div style="margin-bottom: 8px;">
+                <strong>Academic Dermoscopy (HAM10000)</strong>:<br>
+                Uniform polarized contact lighting · Fixed optical magnification · Immersion fluid · No camera shake.
+              </div>
+              <div>
+                <strong>Everyday Mobile Photography</strong>:<br>
+                Variable smartphone lenses · Motion blur & hand tremor · Harsh shadows & flash glare · Occluding body hairs.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Clinical Decision Support Platform</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 2 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Proposed Solution & Workflow -->
+    <section class="slide" data-slide="3" data-notes="DermAI addresses this domain gap through a disciplined end-to-end workflow. Rather than blindly passing raw smartphone photos into a neural network, we enforce: Screen before you predict. The user snaps or uploads a photo, our computer vision algorithms immediately evaluate blur, brightness, contrast, and resolution. Poor images are rejected with actionable guidance. Approved images undergo DullRazor hair inpainting and CLAHE normalization before entering deep learning models.">
+      <div>
+        <div class="slide-kicker">System Architecture</div>
+        <h2 class="slide-title">End-to-End Mobile-to-Clinical Workflow</h2>
+      </div>
+
+      <div class="slide-body">
+        <div style="background: #F1F5F9; border-radius: 8px; padding: 24px; border: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+            <div style="text-align: center; flex: 1;">
+              <div style="font-size: 24px;">📱</div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--navy); margin-top: 4px;">1. Mobile Capture</div>
+              <div style="font-size: 10px; color: var(--muted);">Camera / Gallery</div>
+            </div>
+            <div style="color: var(--teal); font-weight: bold;">➔</div>
+
+            <div style="text-align: center; flex: 1; background: #FFFBEB; padding: 8px; border-radius: 6px; border: 1px dashed #FDE68A;">
+              <div style="font-size: 24px;">🔍</div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--amber); margin-top: 4px;">2. Quality Gate</div>
+              <div style="font-size: 10px; color: var(--muted);">Blur, Brightness, Contrast</div>
+            </div>
+            <div style="color: var(--teal); font-weight: bold;">➔</div>
+
+            <div style="text-align: center; flex: 1;">
+              <div style="font-size: 24px;">🔒</div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--navy); margin-top: 4px;">3. Secure Intake</div>
+              <div style="font-size: 10px; color: var(--muted);">JWT + Audit Trail</div>
+            </div>
+            <div style="color: var(--teal); font-weight: bold;">➔</div>
+
+            <div style="text-align: center; flex: 1; background: var(--teal-light); padding: 8px; border-radius: 6px; border: 1px solid #A7F3D0;">
+              <div style="font-size: 24px;">✨</div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--teal-dark); margin-top: 4px;">4. Preprocessing</div>
+              <div style="font-size: 10px; color: var(--muted);">DullRazor + CLAHE</div>
+            </div>
+            <div style="color: var(--teal); font-weight: bold;">➔</div>
+
+            <div style="text-align: center; flex: 1;">
+              <div style="font-size: 24px;">🧠</div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--navy); margin-top: 4px;">5. AI Inference</div>
+              <div style="font-size: 10px; color: var(--muted);">CNN / ViT (M2-3)</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; font-size: 12px; color: #475569; text-align: center;">
+          <strong>Core Engineering Rule</strong>: <em>Screen Before You Predict</em>. Defective inputs are rejected before model inference.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>End-to-End Workflow</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 3 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Scope & Roadmap -->
+    <section class="slide" data-slide="4" data-notes="As required, today we focus exclusively on Milestone 1: project initialization, dataset diagnostics, and core setup. We have built the monorepo, ingested HAM10000, solved the lesion ID leakage trap, created the 6-table database schema, implemented JWT auth with 5 roles, built the quality gate, and operationalized the preprocessing pipeline. We have explicitly deferred classification models, U-Net segmentation, Grad-CAM, and PDF reports to Milestones 2, 3, and 4.">
+      <div>
+        <div class="slide-kicker">Scope Boundaries & Deliverables</div>
+        <h2 class="slide-title">Milestone 1 Scope vs. Project Roadmap</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card-box-accent">
+            <div class="box-title" style="color: var(--teal-dark);">Milestone 1: Completed Today</div>
+            <ul class="check-list">
+              <li>Monorepo architecture (FastAPI + React 19 + Docker).</li>
+              <li>Ingestion & EDA of 10,015 HAM10000 records.</li>
+              <li>Grouped stratified splitting by <code>lesion_id</code>.</li>
+              <li>Relational schema with 6 tables & de-identified patients.</li>
+              <li>JWT authentication with 5 RBAC roles & audit logging.</li>
+              <li>Automated quality gate (Blur, Exposure, Contrast).</li>
+              <li>Preprocessing pipeline (DullRazor + CLAHE + Tensor).</li>
+              <li>Interactive dashboard with side-by-side view.</li>
+            </ul>
+          </div>
+
+          <div class="card-box">
+            <div class="box-title" style="color: var(--muted);">Deferred to Milestones 2 – 4</div>
+            <ul style="font-size: 13px; line-height: 1.6; color: var(--muted); padding-left: 18px;">
+              <li><strong>Milestone 2</strong>: U-Net lesion segmentation, baseline CNN classifiers (ResNet50, EfficientNet), focal loss tuning.</li>
+              <li><strong>Milestone 3</strong>: Vision Transformers (ViT, Swin), Grad-CAM explainability maps, risk categorization.</li>
+              <li><strong>Milestone 4</strong>: Multi-model ensemble, automated PDF reports, and cloud deployment.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Milestone Boundaries</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 4 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Dataset Diagnostics & Class Imbalance -->
+    <section class="slide" data-slide="5" data-notes="For our dataset foundation, we ingested the official HAM10000 dataset containing 10,015 images. Over 53% are verified by gold-standard biopsy histopathology. Our analysis reveals extreme class imbalance: benign melanocytic nevi represent 67% of the dataset, while malignant melanomas make up 11%, basal cell carcinomas 5%, and rare vascular lesions only 1.4%. To prevent models from defaulting to nevus predictions, we computed balanced class weights ranging from 0.21 for nevi up to 12.44 for dermatofibromas.">
+      <div>
+        <div class="slide-kicker">Dataset Selection & Analysis</div>
+        <h2 class="slide-title">HAM10000 Benchmark & Severe Class Imbalance</h2>
+      </div>
+
+      <div class="slide-body">
+        <div style="font-size: 13px; color: #334155; margin-bottom: 14px;">
+          <strong>Source</strong>: Harvard Dataverse / ISIC Archive · <strong>10,015 images</strong> · <strong>7,470 unique lesions</strong> · 53.3% histopathology verified.
+        </div>
+
+        <div class="card-box" style="padding: 12px 16px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border); color: var(--navy);">
+                <th style="padding: 6px;">Class</th>
+                <th style="padding: 6px;">Medical Diagnosis</th>
+                <th style="padding: 6px;">Category</th>
+                <th style="padding: 6px; text-align: right;">Count</th>
+                <th style="padding: 6px; text-align: right;">% of Dataset</th>
+                <th style="padding: 6px; text-align: right;">Class Weight (w_c)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 5px; font-weight: bold; color: #2563EB;">nv</td>
+                <td>Melanocytic Nevus</td>
+                <td>Benign Mole</td>
+                <td style="text-align: right; font-family: monospace;">6,705</td>
+                <td style="text-align: right; font-family: monospace; font-weight: bold;">66.95%</td>
+                <td style="text-align: right; font-family: monospace;">0.2134</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9; background: #FEF2F2;">
+                <td style="padding: 5px; font-weight: bold; color: var(--rose);">mel</td>
+                <td><strong>Melanoma</strong></td>
+                <td>Malignant Cancer</td>
+                <td style="text-align: right; font-family: monospace;">1,113</td>
+                <td style="text-align: right; font-family: monospace; font-weight: bold;">11.11%</td>
+                <td style="text-align: right; font-family: monospace; font-weight: bold; color: var(--rose);">1.2855</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 5px; font-weight: bold;">bkl</td>
+                <td>Benign Keratosis</td>
+                <td>Solar Lentigo/Seborrheic</td>
+                <td style="text-align: right; font-family: monospace;">1,099</td>
+                <td style="text-align: right; font-family: monospace;">10.97%</td>
+                <td style="text-align: right; font-family: monospace;">1.3019</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9; background: #FEF2F2;">
+                <td style="padding: 5px; font-weight: bold; color: var(--rose);">bcc</td>
+                <td><strong>Basal Cell Carcinoma</strong></td>
+                <td>Malignant Cancer</td>
+                <td style="text-align: right; font-family: monospace;">514</td>
+                <td style="text-align: right; font-family: monospace;">5.13%</td>
+                <td style="text-align: right; font-family: monospace; font-weight: bold; color: var(--rose);">2.7836</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 5px; font-weight: bold;">akiec</td>
+                <td>Actinic Keratosis</td>
+                <td>Pre-Cancerous</td>
+                <td style="text-align: right; font-family: monospace;">327</td>
+                <td style="text-align: right; font-family: monospace;">3.27%</td>
+                <td style="text-align: right; font-family: monospace;">4.3754</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #F1F5F9;">
+                <td style="padding: 5px; font-weight: bold;">vasc</td>
+                <td>Vascular Lesion</td>
+                <td>Benign Vascular</td>
+                <td style="text-align: right; font-family: monospace;">142</td>
+                <td style="text-align: right; font-family: monospace;">1.42%</td>
+                <td style="text-align: right; font-family: monospace;">10.0757</td>
+              </tr>
+              <tr>
+                <td style="padding: 5px; font-weight: bold;">df</td>
+                <td>Dermatofibroma</td>
+                <td>Benign Dermal Nodule</td>
+                <td style="text-align: right; font-family: monospace;">115</td>
+                <td style="text-align: right; font-family: monospace;">1.15%</td>
+                <td style="text-align: right; font-family: monospace;">12.4413</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>7 Diagnostic Classes</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 5 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: Lesion ID Leakage Prevention -->
+    <section class="slide" data-slide="6" data-notes="This is one of our most important technical safeguards. In HAM10000, 10,015 images come from only 7,470 unique lesions because patients had multiple photos taken over time. Standard random train/test splits place different photos of the same patient lesion into both train and test sets, causing feature leakage where models memorize patient skin traits rather than generalizable disease features. In DermAI, we engineered scripts/make_splits.py to group strictly by lesion_id. We verified 0 common lesions between train, validation, and test splits.">
+      <div>
+        <div class="slide-kicker">Methodological Rigor</div>
+        <h2 class="slide-title">Eliminating The Lesion ID Leakage Trap</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card-box" style="border-left: 4px solid var(--rose);">
+            <div class="box-title" style="color: var(--rose);">The Common Academic Flaw</div>
+            <p style="font-size: 13px; color: #334155; line-height: 1.6;">
+              10,015 images represent only <strong>7,470 unique lesions</strong> (up to 6 photos per lesion). Standard random 80/20 splitting leaks identical patient lesions across train and test sets. The model memorizes patient-specific skin textures, producing falsely inflated test scores (~96%) that fail completely in real clinical use.
+            </p>
+          </div>
+
+          <div class="card-box-accent" style="border-left: 4px solid var(--teal-dark);">
+            <div class="box-title" style="color: var(--teal-dark);">DermAI Grouped Stratified Solution</div>
+            <div style="font-size: 13px; color: #1E293B; line-height: 1.6;">
+              We enforce <strong>zero-leakage grouping by <code>lesion_id</code></strong>:
+              <ul style="margin-top: 6px; padding-left: 18px;">
+                <li><strong>Train (70.03%)</strong>: 7,014 images · 5,230 unique lesions</li>
+                <li><strong>Validation (14.97%)</strong>: 1,499 images · 1,120 unique lesions</li>
+                <li><strong>Test (15.00%)</strong>: 1,502 images · 1,120 unique lesions</li>
+              </ul>
+              <div style="margin-top: 8px; font-weight: bold; color: var(--teal-dark);">
+                ✓ Verified: Exactly 0 common lesions between partitions.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Leakage Prevention Guarantee</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 6 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Quality Gate -->
+    <section class="slide" data-slide="7" data-notes="Mobile phone photos often suffer from blur, lighting extremes, and low resolution. Our intake quality gate applies computer vision algorithms synchronously on upload: Laplacian variance detects motion blur with a cutoff of 50; mean gray level screens out dark or flash-washed images; contrast standard deviation ensures border visibility; and resolution must be at least 224x224. Images scoring Poor are rejected with direct advice on how to retake the photo.">
+      <div>
+        <div class="slide-kicker">Intake Quality Gate</div>
+        <h2 class="slide-title">Pre-Inference Computer Vision Quality Screening</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card-box">
+            <div class="box-title">Automated CV Metrics</div>
+            <div style="font-size: 12px; color: #334155; line-height: 1.6; space-y-2;">
+              <div style="margin-bottom: 8px;">
+                <strong>1. Blur Detection (Laplacian Variance)</strong><br>
+                $\sigma^2 = \text{Var}(\nabla^2 I_{\text{gray}})$. Threshold: $\sigma^2 < 50 \implies$ Poor (Blurry).
+              </div>
+              <div style="margin-bottom: 8px;">
+                <strong>2. Exposure & Luminance (Mean Gray Level)</strong><br>
+                Mean $\mu < 35 \implies$ Dark · Mean $\mu > 230 \implies$ Flash Overexposure.
+              </div>
+              <div style="margin-bottom: 8px;">
+                <strong>3. Contrast (Standard Deviation)</strong><br>
+                Std $\sigma < 18 \implies$ Low Contrast (indistinct lesion boundaries).
+              </div>
+              <div>
+                <strong>4. Resolution Check</strong>: Minimum $224 \times 224$ pixels, max 10 MB.
+              </div>
+            </div>
+          </div>
+
+          <div class="card-box" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="box-title">Quality Tiers & Actions</div>
+              <div style="margin-bottom: 10px;">
+                <span style="background: #ECFDF5; color: #065F46; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">Good Quality</span>
+                <span style="font-size: 12px; color: #334155; margin-left: 8px;">Sharp, optimal luminance &rarr; Accepted for inference.</span>
+              </div>
+              <div style="margin-bottom: 10px;">
+                <span style="background: #FFFBEB; color: #92400E; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">Acceptable</span>
+                <span style="font-size: 12px; color: #334155; margin-left: 8px;">Minor lighting variance &rarr; Accepted with flag.</span>
+              </div>
+              <div>
+                <span style="background: #FEF2F2; color: #991B1B; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">Poor Quality</span>
+                <span style="font-size: 12px; color: #334155; margin-left: 8px;"><strong>Rejected</strong> &rarr; User prompted to retake with guidance.</span>
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--muted); background: #F1F5F9; padding: 8px; border-radius: 6px;">
+              Eliminates Garbage-In, Garbage-Out failure before clinical model inference.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Image Quality Assessment</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 7 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Preprocessing Pipeline -->
+    <section class="slide" data-slide="8" data-notes="Once an image passes the quality gate, it enters our clinical preprocessing pipeline in ml/preprocessing/pipeline.py. We implemented DullRazor morphological blackhat filtering and Telea inpainting to remove occluding body hairs. To handle lighting variance without corrupting diagnostic color, we apply CLAHE strictly to the Luminance channel in LAB color space, preserving A and B chromatic pigments. The image is cropped, resized to 224x224, and standardized to ImageNet mean and variance, yielding a ready float32 tensor [1, 3, 224, 224].">
+      <div>
+        <div class="slide-kicker">Medical Image Processing</div>
+        <h2 class="slide-title">Standardized Preprocessing Engine (DullRazor + CLAHE)</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card-box">
+            <div class="box-title">Algorithmic Stages</div>
+            <ul class="check-list">
+              <li><strong>EXIF Auto-Orientation</strong>: Transposes mobile orientation tags.</li>
+              <li><strong>DullRazor Hair Removal</strong>: $17\times17$ blackhat structuring element isolates dark hairs; Telea inpainting restores skin texture.</li>
+              <li><strong>L-Channel CLAHE</strong>: Adaptive contrast enhancement on Luminance (L) in LAB color space, preserving melanin & vascular pigments.</li>
+              <li><strong>Center Square Crop & Resize</strong>: Aspect-ratio preserving scaling to $224 \times 224 \times 3$.</li>
+              <li><strong>ImageNet Standardization</strong>: Normalizes to $\mu=[0.485, 0.456, 0.406]$, $\sigma=[0.229, 0.224, 0.225]$ as float32 tensor $[1, 3, 224, 224]$.</li>
+            </ul>
+          </div>
+
+          <div class="card-box-accent">
+            <div class="box-title" style="color: var(--teal-dark);">Side-by-Side Visual Verification</div>
+            <div style="font-size: 12px; color: #1E293B; line-height: 1.6;">
+              <p style="margin-bottom: 8px;">
+                DermAI exposes <code>POST /images/{id}/preprocess</code> so clinicians and researchers can inspect the transformation live in the browser:
+              </p>
+              <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #A7F3D0; font-family: monospace; font-size: 11px;">
+                Raw Mobile Capture (600x450 RGB)<br>
+                &darr; Blackhat hair inpainting<br>
+                &darr; CLAHE (clip=2.0, grid=8x8)<br>
+                &darr; Center crop & resize<br>
+                Standardized Tensor [1, 3, 224, 224]
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Artifact Reduction & Normalization</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 8 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: System Architecture & Security -->
+    <section class="slide" data-slide="9" data-notes="The full-stack platform is designed around enterprise clinical security and privacy. We use FastAPI, PostgreSQL 16, and React 19. Our relational schema contains 6 tables with strictly de-identified patient data—zero real patient names or PII are accepted. We support 5 distinct roles: Patient, Clinician, Researcher, ML Engineer, and Admin. Patients can only query their own records, clinicians can review all cohort cases, and every action is recorded in an immutable audit log.">
+      <div>
+        <div class="slide-kicker">Software Engineering & Governance</div>
+        <h2 class="slide-title">Multi-Tier Architecture, Schema & RBAC Security</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card-box">
+            <div class="box-title">Stack Architecture</div>
+            <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+              <strong>Backend</strong>: FastAPI, SQLAlchemy 2, Pydantic v2.<br>
+              <strong>Database</strong>: PostgreSQL 16 / SQLite.<br>
+              <strong>Storage</strong>: Local FS / MinIO S3 API.<br>
+              <strong>Frontend</strong>: React 19, TypeScript, Tailwind CSS.
+            </div>
+          </div>
+
+          <div class="card-box">
+            <div class="box-title">6 Relational Tables</div>
+            <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+              <code>users</code>: Auth & roles.<br>
+              <code>patients</code>: De-identified records.<br>
+              <code>cases</code>: Clinical lesions.<br>
+              <code>images</code>: Quality metrics & files.<br>
+              <code>analyses</code>: Model inference.<br>
+              <code>audit_logs</code>: Immutable audit.
+            </div>
+          </div>
+
+          <div class="card-box">
+            <div class="box-title">Role-Based Access</div>
+            <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+              <strong>Patient</strong>: Isolated personal cases.<br>
+              <strong>Clinician</strong>: Cohort review & notes.<br>
+              <strong>Researcher</strong>: De-identified trends.<br>
+              <strong>ML Engineer</strong>: Preprocessing & weights.<br>
+              <strong>Admin</strong>: User & security logs.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>HIPAA / GDPR Aligned Architecture</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 9 of 10</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: Verification & Next Steps -->
+    <section class="slide" data-slide="10" data-notes="In conclusion, Milestone 1 is completely operational. All 6 automated backend tests pass, the web application is running with live quality assessment and side-by-side inspection, and our dataset is prepared with zero leakage. We are fully primed for Milestone 2, where we will train baseline CNN classifiers like ResNet50 and EfficientNet, implement U-Net lesion segmentation, and introduce smartphone datasets like PAD-UFES-20 and SCIN. Thank you, and I look forward to your questions.">
+      <div>
+        <div class="slide-kicker">Verification & Future Milestones</div>
+        <h2 class="slide-title">Milestone 1 Completion & Transition to Model Training</h2>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card-box-accent">
+            <div class="box-title" style="color: var(--teal-dark);">Milestone 1 Verification Passed</div>
+            <ul class="check-list">
+              <li><strong>6/6 Automated Tests Passing</strong> (Auth, RBAC isolation, quality rejection, preprocessing pipeline).</li>
+              <li><strong>Zero Leakage Verified</strong>: 70/15/15 grouped splits by <code>lesion_id</code>.</li>
+              <li><strong>Operational Frontend</strong>: Live role switching, drag-and-drop intake, side-by-side comparison.</li>
+              <li><strong>Reproducibility</strong>: Docker Compose, Makefile, and demo seed scripts.</li>
+            </ul>
+          </div>
+
+          <div class="card-box">
+            <div class="box-title">Milestone 2 Next Steps</div>
+            <ul style="font-size: 13px; line-height: 1.6; color: #334155; padding-left: 18px;">
+              <li><strong>Lesion Segmentation</strong>: U-Net and DeepLabV3+ for automated boundary extraction.</li>
+              <li><strong>Baseline CNN Classifiers</strong>: ResNet50, EfficientNet-B0, MobileNetV3.</li>
+              <li><strong>Imbalance Loss Tuning</strong>: Focal loss and weighted cross-entropy.</li>
+              <li><strong>Mobile Data Expansion</strong>: Integrate PAD-UFES-20 and SCIN phone photos.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Ready for Milestone 2</span>
+        <span>AI-assisted analysis, not a standalone medical diagnosis.</span>
+        <span>Slide 10 of 10</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Speaker Notes / Script Drawer -->
+  <footer id="notesDrawer" class="notes-drawer">
+    <div class="notes-header">Verbatim Presentation Script (Slide <span id="notesSlideNum">1</span>)</div>
+    <div id="notesText" class="notes-content">Loading script...</div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    function updateSlide() {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const active = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+      if (active) {
+        active.classList.add('active');
+        document.getElementById('slideIndicator').innerText = `Slide ${currentSlide} / ${totalSlides}`;
+        document.getElementById('notesSlideNum').innerText = currentSlide;
+        document.getElementById('notesText').innerText = `"${active.getAttribute('data-notes')}"`;
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleNotes() {
+      const drawer = document.getElementById('notesDrawer');
+      drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    // Initialize
+    updateSlide();
+  </script>
+</body>
+</html>
