@@ -1,0 +1,54 @@
+﻿# ==============================================================================
+# DermAI: Risk Mapping Protocol (configs/risk_map.yaml)
+#
+# IMPORTANT NOTICE:
+# DermAI is strictly an AI-assisted screening and decision-support system, NOT
+# an autonomous diagnostic tool. Risk tiers are defined based on established
+# dermatopathology literature from HAM10000 ground truth labels:
+# - High: Malignant lesions requiring immediate specialist histological biopsy.
+# - Moderate: Pre-malignant or basal cell carcinomas requiring timely dermatological care.
+# - Low: Typically benign melanocytic or non-melanocytic lesions.
+# - Requires Clinical Review: Triggered whenever model confidence is below threshold (< 0.50)
+#   or image quality is degraded, mandating human dermatologist evaluation.
+# ==============================================================================
+
+protocol_version: "1.0.0-research"
+confidence_threshold: 0.50
+low_confidence_fallback: "Requires Clinical Review"
+
+categories:
+  mel:
+    name: "Melanoma"
+    risk_level: "High Risk"
+    clinical_priority: "Immediate Dermatological Evaluation"
+    recommendation: "High-priority clinical assessment recommended for histological evaluation of suspected invasive or in situ melanoma."
+  bcc:
+    name: "Basal Cell Carcinoma"
+    risk_level: "Moderate Risk"
+    clinical_priority: "Prompt Clinical Review"
+    recommendation: "Prompt dermatological evaluation advised for clinical examination and excision/biopsy planning."
+  akiec:
+    name: "Actinic Keratosis / Intraepithelial Carcinoma"
+    risk_level: "Moderate Risk"
+    clinical_priority: "Prompt Clinical Review"
+    recommendation: "Clinical review advised to manage dysplastic pre-cancerous lesions or Bowen's disease."
+  nv:
+    name: "Melanocytic Nevus"
+    risk_level: "Low Risk"
+    clinical_priority: "Routine Monitoring"
+    recommendation: "Appears consistent with a benign melanocytic nevus. Continue periodic self-examination using ABCDE criteria."
+  bkl:
+    name: "Benign Keratosis"
+    risk_level: "Low Risk"
+    clinical_priority: "Routine Monitoring"
+    recommendation: "Appears consistent with a benign keratosis (seborrheic keratosis or solar lentigo). Routine follow-up if symptomatic."
+  df:
+    name: "Dermatofibroma"
+    risk_level: "Low Risk"
+    clinical_priority: "Routine Monitoring"
+    recommendation: "Benign fibrous dermal histiocytoma. No immediate oncological concern unless changing or symptomatic."
+  vasc:
+    name: "Vascular Lesion"
+    risk_level: "Low Risk"
+    clinical_priority: "Routine Monitoring"
+    recommendation: "Benign vascular malformation (cherry angioma, pyogenic granuloma). Monitor for persistent bleeding or rapid changes."
