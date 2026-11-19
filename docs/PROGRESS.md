@@ -13,9 +13,9 @@
 |---|---|---|---|---|---|---|---|
 | **0** | **M1** | **Setup & Audit** | **Done** | Complete audit of 19 spec modules in `docs/AUDIT.md`, `AGENTS.md` protocol rules, `.env.example`, `.gitignore`, `Makefile`, initialized Git repository. | View `docs/AUDIT.md` & `AGENTS.md` | None | Proceed to Phase 1. |
 | **1** | **M1** | **Foundation: App Skeleton & Core Services** | **Done** | Argon2 password hashing, JWT access + refresh tokens, OAuth2 login (`/auth/login`, `/auth/token`, `/auth/refresh`), RBAC for 5 roles, de-identified patient/case isolation, upload validation, quality gate, OpenCV preprocessing pipeline, `Notification` and `ModelRegistry` DB models, `scripts/seed.py`. | `pytest tests/test_backend.py -v`, `python scripts/seed.py` | None (6/6 tests passing) | Proceed to Phase 2: Data & EDA. |
-| **2** | **M1** | **Data & EDA** | **In Progress** | Grouped 70/15/15 splits by `lesion_id`, zero-overlap test, EDA notebook. | `python scripts/make_splits.py` | None | Implement zero-overlap unit test and verify dataset splits. |
+| **2** | **M1** | **Data & EDA** | **Done** | HAM10000 10,015 records parsed; 70/15/15 split grouped strictly by `lesion_id` to prevent data leakage (`data/splits/`); unit test proving 0% lesion overlap; EDA notebook; `docs/02_dataset.md`. | `pytest tests/test_splits.py -v`, `python scripts/make_splits.py` | None (zero overlap verified) | Proceed to Phase 4: Baseline Classifier. |
 | **3** | **M2** | **Lesion Segmentation** | **Deferred** | (Deferred per Today Mode scope: Otsu classical segmentation used in Phase 6) | - | - | Listed under Planned Work. |
-| **4** | **M2** | **Baseline Classifier (EfficientNet-B0)** | **Todo** | - | `python ml/train.py --smoke`, `python ml/evaluate.py` | Need YAML config, training script with `--smoke`, evaluate.py | Implement EfficientNet-B0 training and evaluation. |
+| **4** | **M2** | **Baseline Classifier (EfficientNet-B0)** | **In Progress** | Kaggle-ready PyTorch training script with `--smoke` flag, `evaluate.py`, `reports/model_comparison.md`. | `python ml/train.py --smoke`, `python ml/evaluate.py` | Model training pending execution | Run smoke training and evaluate metrics. |
 | **5** | **M3** | **Advanced AI & Explainability** | **Deferred** | (Deferred per Today Mode scope: Grad-CAM++ integrated in Phase 6) | - | - | Listed under Planned Work. |
 | **6** | **M3/M4** | **Inference Service & Model Management** | **Todo** | - | `POST /cases/{id}/analyze`, `GET /models` | None | Orchestrate analysis with Otsu segmentation, Grad-CAM++, model registry. |
 | **7** | **M4** | **Frontend PWA** | **Todo** | - | `npm run dev` | None | Connect React frontend to FastAPI REST backend without Firebase. |
@@ -25,9 +25,7 @@
 
 ---
 
-## 2. Phase 1 Gate Verification Results
-- `pytest tests/test_backend.py -v`: 6 passed in 4.09s
-- Role isolation: Verified (Patients cannot view other patients' cases; Clinicians can view cohort)
-- Password hashing: Verified with Argon2id (`argon2.PasswordHasher`)
-- Refresh token flow: Verified with `/auth/refresh`
-- Seed script: 5 demo accounts created with Argon2 hashes (`scripts/seed.py`)
+## 2. Phase 2 Gate Verification Results
+- `pytest tests/test_splits.py -v`: 1 passed (asserted 0 shared `lesion_id` across train, val, test)
+- Split proportions: Train 70.03% (7,014 imgs), Val 14.97% (1,499 imgs), Test 15.00% (1,502 imgs)
+- Classes: All 7 HAM10000 classes represented across all splits with computed inverse-frequency class weights
