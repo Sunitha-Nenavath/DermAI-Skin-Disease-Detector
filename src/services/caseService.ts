@@ -74,6 +74,40 @@ export const caseService = {
     userId: string,
     filters?: { status?: string; bodyLocation?: string; dateRange?: 'all' | '7d' | '30d' }
   ): Promise<ClinicalCase[]> => {
+    const serverToken = localStorage.getItem('dermai_server_token');
+    if (serverToken) {
+      try {
+        const url = new URL('/api/cases', window.location.origin);
+        if (filters?.status && filters.status !== 'all') url.searchParams.set('status', filters.status);
+        if (filters?.bodyLocation && filters.bodyLocation !== 'all') url.searchParams.set('body_location', filters.bodyLocation);
+        const res = await fetch(url.toString(), {
+          headers: { Authorization: `Bearer ${serverToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = data.map((item: any) => ({
+            id: String(item.id),
+            case_code: item.case_code,
+            title: item.title,
+            body_location: item.body_location,
+            status: item.status,
+            owner_id: String(item.owner_id),
+            owner_name: item.owner_name,
+            patient: item.patient,
+            image_url: item.images && item.images.length > 0 ? item.images[0].file_url : undefined,
+            quality_label: item.images && item.images.length > 0 ? item.images[0].quality_label : undefined,
+            quality_metrics: item.images && item.images.length > 0 ? item.images[0].quality_metrics : undefined,
+            created_at: item.created_at,
+            updated_at: item.created_at,
+            medical_disclaimer: item.medical_disclaimer,
+          }));
+          return applyCaseFilters(mapped, role, filters);
+        }
+      } catch (e) {
+        console.warn('Backend cases fetch failed, using local fallback:', e);
+      }
+    }
+
     // Local Demo Sandbox when Firebase Auth session is not active
     if (!auth.currentUser) {
       let local = readLocalCases();
@@ -107,6 +141,36 @@ export const caseService = {
   },
 
   getCaseById: async (id: string, role: UserRole, userId: string): Promise<ClinicalCase | null> => {
+    const serverToken = localStorage.getItem('dermai_server_token');
+    if (serverToken && !id.startsWith('local_') && !id.startsWith('case_demo_')) {
+      try {
+        const res = await fetch(`/api/cases/${id}`, {
+          headers: { Authorization: `Bearer ${serverToken}` },
+        });
+        if (res.ok) {
+          const item = await res.json();
+          return {
+            id: String(item.id),
+            case_code: item.case_code,
+            title: item.title,
+            body_location: item.body_location,
+            status: item.status,
+            owner_id: String(item.owner_id),
+            owner_name: item.owner_name,
+            patient: item.patient,
+            image_url: item.images && item.images.length > 0 ? item.images[0].file_url : undefined,
+            quality_label: item.images && item.images.length > 0 ? item.images[0].quality_label : undefined,
+            quality_metrics: item.images && item.images.length > 0 ? item.images[0].quality_metrics : undefined,
+            created_at: item.created_at,
+            updated_at: item.created_at,
+            medical_disclaimer: item.medical_disclaimer,
+          };
+        }
+      } catch (e) {
+        console.warn('Backend getCaseById fallback:', e);
+      }
+    }
+
     if (!auth.currentUser) {
       const found = readLocalCases().find((c) => c.id === id) || null;
       if (!found) return null;
@@ -149,6 +213,46 @@ export const caseService = {
     creatorEmail: string,
     creatorRole: string
   ): Promise<ClinicalCase> => {
+    const serverToken = localStorage.getItem('dermai_server_token');
+    if (serverToken) {
+      try {
+        const res = await fetch('/api/cases', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${serverToken}`,
+          },
+          body: JSON.stringify({
+            title: caseData.title,
+            body_location: caseData.body_location,
+            patient_age: caseData.patient?.age,
+            patient_gender: caseData.patient?.gender,
+            medical_history: caseData.patient?.medical_history,
+            allergies: caseData.patient?.allergies,
+            clinical_notes: caseData.clinical_notes || caseData.patient?.clinical_notes,
+          }),
+        });
+        if (res.ok) {
+          const item = await res.json();
+          return {
+            id: String(item.id),
+            case_code: item.case_code,
+            title: item.title,
+            body_location: item.body_location,
+            status: item.status,
+            owner_id: String(item.owner_id),
+            owner_name: item.owner_name,
+            patient: item.patient,
+            created_at: item.created_at,
+            updated_at: item.created_at,
+            medical_disclaimer: item.medical_disclaimer,
+          };
+        }
+      } catch (e) {
+        console.warn('Backend createCase fallback:', e);
+      }
+    }
+
     const now = new Date().toISOString();
     const effectiveOwnerId = auth.currentUser ? auth.currentUser.uid : caseData.owner_id;
     const payload: Omit<ClinicalCase, 'id'> = {
@@ -245,6 +349,23 @@ export const caseService = {
     userRole: string
   ): Promise<void> => {
     const timestamp = new Date().toLocaleString();
+
+    const serverToken = localStorage.getItem('dermai_server_token');
+    if (serverToken && !id.startsWith('local_') && !id.startsWith('case_demo_')) {
+      try {
+        await fetch(`/api/cases/${id}/notes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${serverToken}`,
+          },
+          body: JSON.stringify({ content: notes }),
+        });
+        return;
+      } catch (e) {
+        console.warn('Backend addClinicalNotes fallback:', e);
+      }
+    }
 
     if (!auth.currentUser) {
       const local = readLocalCases();

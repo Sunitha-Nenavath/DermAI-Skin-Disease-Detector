@@ -21,6 +21,7 @@ from backend.auth import (
     create_refresh_token,
     log_audit_event,
     get_client_ip,
+    get_current_user,
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -195,3 +196,18 @@ def refresh_token(
         full_name=user.full_name,
         role=user.role
     )
+
+
+@router.get("/me")
+def get_auth_me(current_user: User = Depends(get_current_user)):
+    return {
+        "user": {
+            "uid": str(current_user.id),
+            "id": current_user.id,
+            "email": current_user.email,
+            "displayName": current_user.full_name,
+            "role": current_user.role,
+            "createdAt": current_user.created_at.isoformat() if current_user.created_at else None,
+        }
+    }
+

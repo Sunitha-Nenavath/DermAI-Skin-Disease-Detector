@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/routers/models.py
 Model registry and versioning management endpoints.
 """
@@ -9,15 +9,26 @@ import json
 import os
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.models import ModelRegistry, User, UserRole
 from backend.schemas import ModelRegistryResponse
 from backend.auth import get_current_user, require_role
+from backend.ml_service import ml_engine
 
 router = APIRouter(prefix="/models", tags=["Model Management"])
+ml_router = APIRouter(prefix="/ml", tags=["ML Inference"])
+
+
+@ml_router.post("/predict")
+async def predict_image(image: UploadFile = File(...)):
+    image_bytes = await image.read()
+    if not image_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty image upload.")
+    return ml_engine.analyze_image_bytes(image_bytes)
+
 
 
 @router.get("", response_model=List[ModelRegistryResponse])

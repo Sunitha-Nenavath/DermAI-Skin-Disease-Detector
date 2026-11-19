@@ -1,4 +1,4 @@
-﻿# DermAI: Project Progress & Memory Tracker
+# DermAI: Project Progress & Memory Tracker
 
 **Project:** DermAI: Skin Disease Detector from Mobile Images Using Deep Learning  
 **Internship:** Infosys Springboard  
@@ -18,15 +18,17 @@
 | **4** | **M2** | **Baseline Classifier (EfficientNet-B0)** | **Done** | `ml/configs/efficientnet_b0.yaml`, `configs/risk_map.yaml`, `ml/train.py` with `--smoke` flag, `ml/evaluate.py`, `models/efficientnet_b0_best.pt`, real metrics in `models/metrics.json` and `reports/model_comparison.md`. | `python ml/train.py --arch efficientnet_b0 --smoke`, `python ml/evaluate.py` | None (smoke model trained & evaluated) | Proceed to Phase 6: Inference Service & Model Registry. |
 | **5** | **M3** | **Advanced AI & Explainability** | **Deferred** | (Deferred per Today Mode scope: Grad-CAM++ integrated in Phase 6) | - | - | Listed under Planned Work. |
 | **6** | **M3/M4** | **Inference Service & Model Management** | **Done** | `POST /cases/{id}/analyze` orchestration: OpenCV DullRazor + CLAHE, classical Otsu lesion segmentation, PyTorch EfficientNet-B0 classification, Grad-CAM++ heatmap overlay, `configs/risk_map.yaml` calibrated risk tiers, "No trained model available" fallback, Model Registry API (`GET /models`, `POST /models/{id}/activate`). | `pytest tests/test_analysis.py -v` | None (all tests green) | Proceed to Phase 7: Frontend PWA. |
-| **7** | **M4** | **Frontend PWA** | **In Progress** | React + Vite + TypeScript PWA connected to FastAPI REST backend without Firebase. | `npm run dev` | Unifying API services | Connect React frontend to REST endpoints. |
-| **8** | **M4** | **Reports & Notifications** | **Todo** | - | `GET /cases/{id}/report.pdf` | None | Implement ReportLab PDF generator and notification endpoints. |
+| **7** | **M4** | **Frontend PWA** | **Done** | React + Vite + TypeScript PWA fully connected to FastAPI REST backend (auth, case management, direct ML prediction proxy, model registry synchronization). Production PWA built cleanly. | `npm.cmd run build` & `npm.cmd run dev` | None | Proceed to Phase 8: Reports & Notifications. |
+| **8** | **M4** | **Reports & Notifications** | **In Progress** | Server-side ReportLab PDF generation, JSON/CSV exports, in-app notifications. | `pytest tests/test_reports.py -v` | None | Implement `backend/routers/reports.py` and `backend/routers/notifications.py`. |
 | **9** | **M4** | **Testing, Security & Performance** | **Deferred** | (Deferred per Today Mode scope) | - | - | Listed under Planned Work. |
 | **10** | **M4** | **Deployment & Documentation** | **Todo** | - | `python backend/main.py` | None | Run end-to-end app and produce 5-step demo checklist. |
 
 ---
 
-## 2. Phase 6 Gate Verification Results
-- Integration test: `pytest tests/test_analysis.py -v` PASSED.
-- Full test suite: `pytest tests/ -v` (9 passed in 3.01s).
-- Preprocessing, Otsu mask, EfficientNet-B0 classification, Grad-CAM++ overlay, and risk scoring verified.
-- Mandatory medical disclaimer verified on response: `"AI-assisted analysis, not a standalone medical diagnosis."`
+## 2. Phase 7 Gate Verification Results
+- Frontend production bundle compile: `npm.cmd run build` passed with zero errors (built client environment in 2.51s, PWA service worker generated).
+- FastAPI backend authentication: `/auth/login`, `/auth/register`, `/auth/me` with Argon2 hashing and JWT token exchange.
+- Model registry & direct ML prediction: `/api/models` and `/api/ml/predict` connected.
+- Full test suite: `pytest tests/ -v` (9/9 passed in 3.10s).
+- Mandatory clinical disclaimer on all responses: `"AI-assisted analysis, not a standalone medical diagnosis."`
+

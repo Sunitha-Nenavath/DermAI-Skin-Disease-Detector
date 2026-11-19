@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/ml_service.py
 Inference and Explainable AI Service for DermAI.
 
@@ -235,8 +235,11 @@ class MLInferenceEngine:
             cls = CLASSES[idx]
             top3.append({
                 "class_code": cls,
+                "label": cls,
                 "name": CLASS_NAMES.get(cls, cls),
+                "label_name": CLASS_NAMES.get(cls, cls),
                 "confidence": round(float(probs[idx]), 4),
+                "probability": round(float(probs[idx]), 4),
             })
 
         predicted_code = top3[0]["class_code"]
@@ -252,7 +255,8 @@ class MLInferenceEngine:
         # Risk Assessment
         threshold = self.risk_config.get("confidence_threshold", 0.50)
         cat_info = self.risk_config.get("categories", {}).get(predicted_code, {})
-        if confidence < threshold:
+        is_low_confidence = (confidence < threshold)
+        if is_low_confidence:
             risk_category = "Requires Clinical Review"
             recommendation = "AI model confidence is below the threshold. Professional in-person dermatological evaluation is strongly recommended."
         else:
@@ -277,12 +281,17 @@ class MLInferenceEngine:
             "condition_code": predicted_code,
             "confidence": confidence,
             "risk_category": risk_category,
+            "risk_tag": risk_category,
             "recommendation": recommendation,
             "top3": top3,
             "bounding_box": bbox,
             "preprocessed_image_b64": prep_b64,
             "mask_png_b64": mask_b64,
+            "mask_png_base64": mask_b64,
             "heatmap_png_b64": overlay_b64,
+            "heatmap_png_base64": overlay_b64,
+            "is_demo_mode": False,
+            "requires_clinical_review": is_low_confidence,
             "disclaimer": "AI-assisted analysis, not a standalone medical diagnosis."
         }
 

@@ -64,6 +64,7 @@ app.include_router(users.router, prefix="/api")
 app.include_router(cases.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
 app.include_router(models.router, prefix="/api")
+app.include_router(models.ml_router, prefix="/api")
 
 # Also include at root for direct /auth, /cases, /images path access
 app.include_router(auth.router)
@@ -71,6 +72,8 @@ app.include_router(users.router)
 app.include_router(cases.router)
 app.include_router(images.router)
 app.include_router(models.router)
+app.include_router(models.ml_router)
+
 
 
 if __name__ == "__main__":

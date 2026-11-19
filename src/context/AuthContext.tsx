@@ -59,19 +59,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const env = (import.meta as any).env || {};
 
 export const DEMO_CREDENTIALS: Record<UserRole, { email: string; pass: string; name: string }> = {
-  clinician: { email: 'dr.chen@dermai.hospital', pass: env.VITE_DEMO_CLINICIAN_PASSWORD || '', name: 'Dr. Sarah Chen, MD' },
-  patient: { email: 'patient.case01@dermai.patient', pass: env.VITE_DEMO_PATIENT_PASSWORD || '', name: 'John Doe (De-identified)' },
-  admin: { email: 'admin@dermai.hospital', pass: env.VITE_DEMO_ADMIN_PASSWORD || '', name: 'System Security Admin' },
-  researcher: { email: 'prof.rostova@dermai.edu', pass: env.VITE_DEMO_RESEARCHER_PASSWORD || '', name: 'Prof. Elena Rostova, PhD' },
-  ml_engineer: { email: 'marcus.ai@dermai.lab', pass: env.VITE_DEMO_ML_PASSWORD || '', name: 'Marcus Aurelius (Lead ML)' },
+  clinician: { email: 'clinician@dermai.local', pass: env.VITE_DEMO_CLINICIAN_PASSWORD || 'ClinicianDoctor123!', name: 'Dr. Sarah Chen, MD' },
+  patient: { email: 'patient@dermai.local', pass: env.VITE_DEMO_PATIENT_PASSWORD || 'PatientSecure123!', name: 'John Doe (Patient)' },
+  admin: { email: 'admin@dermai.local', pass: env.VITE_DEMO_ADMIN_PASSWORD || 'AdminSuperUser123!', name: 'System Administrator' },
+  researcher: { email: 'researcher@dermai.local', pass: env.VITE_DEMO_RESEARCHER_PASSWORD || 'ResearchScience123!', name: 'Prof. Elena Rostova' },
+  ml_engineer: { email: 'ml_engineer@dermai.local', pass: env.VITE_DEMO_ML_PASSWORD || 'MLEngineerModel123!', name: 'Marcus Aurelius (Lead ML)' },
 };
 
 export const DEMO_USERS: Record<UserRole, { email: string; name: string; role: UserRole }> = {
-  clinician: { email: 'dr.chen@dermai.hospital', name: 'Dr. Sarah Chen, MD', role: 'clinician' },
-  patient: { email: 'patient.case01@dermai.patient', name: 'John Doe (De-identified)', role: 'patient' },
-  admin: { email: 'admin@dermai.hospital', name: 'System Security Admin', role: 'admin' },
-  researcher: { email: 'prof.rostova@dermai.edu', name: 'Prof. Elena Rostova, PhD', role: 'researcher' },
-  ml_engineer: { email: 'marcus.ai@dermai.lab', name: 'Marcus Aurelius (Lead ML)', role: 'ml_engineer' },
+  clinician: { email: 'clinician@dermai.local', name: 'Dr. Sarah Chen, MD', role: 'clinician' },
+  patient: { email: 'patient@dermai.local', name: 'John Doe (Patient)', role: 'patient' },
+  admin: { email: 'admin@dermai.local', name: 'System Administrator', role: 'admin' },
+  researcher: { email: 'researcher@dermai.local', name: 'Prof. Elena Rostova', role: 'researcher' },
+  ml_engineer: { email: 'ml_engineer@dermai.local', name: 'Marcus Aurelius (Lead ML)', role: 'ml_engineer' },
 };
 
 const ACTIVE_PROFILE_KEY = 'dermai_active_profile';
@@ -204,15 +204,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err: any = new Error(data.error || 'Incorrect email or password.');
+      const err: any = new Error(data.detail || data.error || 'Incorrect email or password.');
       err.code = data.code || 'auth/invalid-credential';
       throw err;
     }
-    localStorage.setItem(SERVER_TOKEN_KEY, data.token);
-    localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(data.user));
-    setUser(data.user);
+    const profile: UserProfile = {
+      uid: String(data.user_id),
+      email: data.email,
+      displayName: data.full_name || data.email.split('@')[0],
+      role: data.role,
+      createdAt: new Date().toISOString(),
+    };
+    localStorage.setItem(SERVER_TOKEN_KEY, data.access_token);
+    if (data.refresh_token) {
+      localStorage.setItem('dermai_refresh_token', data.refresh_token);
+    }
+    localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(profile));
+    setUser(profile);
     setAuthProviderType('server');
-    return data.user as UserProfile;
+    return profile;
   };
 
   const serverRegister = async (
@@ -224,53 +234,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass, displayName, role }),
+      body: JSON.stringify({ email, password: pass, full_name: displayName, role }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err: any = new Error(data.error || 'Unable to create account.');
+      const err: any = new Error(data.detail || data.error || 'Unable to create account.');
       err.code = data.code || 'auth/register-failed';
       throw err;
     }
-    localStorage.setItem(SERVER_TOKEN_KEY, data.token);
-    localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(data.user));
-    setUser(data.user);
+    const profile: UserProfile = {
+      uid: String(data.user_id),
+      email: data.email,
+      displayName: data.full_name || displayName,
+      role: data.role,
+      createdAt: new Date().toISOString(),
+    };
+    localStorage.setItem(SERVER_TOKEN_KEY, data.access_token);
+    if (data.refresh_token) {
+      localStorage.setItem('dermai_refresh_token', data.refresh_token);
+    }
+    localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(profile));
+    setUser(profile);
     setAuthProviderType('server');
-    return data.user as UserProfile;
+    return profile;
   };
 
   const login = async (email: string, pass: string) => {
     const normalizedEmail = email.trim();
     try {
-      const cred = await signInWithEmailAndPassword(auth, normalizedEmail, pass);
-      const profile = await syncUserProfile(cred.user);
-      await auditService.log({
-        action: 'login',
-        user_id: cred.user.uid,
-        user_email: normalizedEmail,
-        user_role: profile.role,
-        details: 'User authenticated via Email & Password (Firebase)',
-      });
-    } catch (fbErr: any) {
-      const code = fbErr?.code || '';
-      const shouldTryServer =
-        code === 'auth/operation-not-allowed' ||
-        code === 'auth/invalid-credential' ||
-        code === 'auth/user-not-found' ||
-        code === 'auth/wrong-password';
-
-      if (!shouldTryServer) {
-        throw fbErr;
-      }
-
       const profile = await serverLogin(normalizedEmail, pass);
       await auditService.log({
         action: 'login',
         user_id: profile.uid,
         user_email: profile.email,
         user_role: profile.role,
-        details: 'User authenticated via Email & Password',
+        details: 'User authenticated via FastAPI REST Authentication',
       });
+      return;
+    } catch (serverErr: any) {
+      try {
+        const cred = await signInWithEmailAndPassword(auth, normalizedEmail, pass);
+        const profile = await syncUserProfile(cred.user);
+        await auditService.log({
+          action: 'login',
+          user_id: cred.user.uid,
+          user_email: normalizedEmail,
+          user_role: profile.role,
+          details: 'User authenticated via Firebase Auth',
+        });
+        return;
+      } catch {
+        throw serverErr;
+      }
     }
   };
 
@@ -281,38 +296,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       normalizedEmail.toLowerCase() === ADMIN_EMAIL ? 'admin' : role;
 
     try {
-      const cred = await createUserWithEmailAndPassword(auth, normalizedEmail, pass);
-      if (cleanName) {
-        await updateProfile(cred.user, { displayName: cleanName }).catch(() => {});
-      }
-
-      const userRef = doc(db, 'users', cred.user.uid);
-      const newProfile: UserProfile = {
-        uid: cred.user.uid,
-        email: normalizedEmail,
-        displayName: cleanName || normalizedEmail.split('@')[0],
-        role: assignedRole,
-        createdAt: new Date().toISOString(),
-      };
-      await setDoc(userRef, newProfile);
-      setUser(newProfile);
-      setAuthProviderType('firebase');
-      localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(newProfile));
-      localStorage.removeItem(SERVER_TOKEN_KEY);
-
-      await auditService.log({
-        action: 'login',
-        user_id: cred.user.uid,
-        user_email: normalizedEmail,
-        user_role: assignedRole,
-        details: `New account registered with role: ${assignedRole}`,
-      });
-    } catch (fbErr: any) {
-      if (fbErr?.code !== 'auth/operation-not-allowed') {
-        throw fbErr;
-      }
-
-      // Firebase Email/Password provider is not enabled yet -> register securely via DermAI server auth
       const profile = await serverRegister(normalizedEmail, pass, cleanName, assignedRole);
       await auditService.log({
         action: 'login',
@@ -321,6 +304,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user_role: profile.role,
         details: `New account registered with role: ${profile.role}`,
       });
+      return;
+    } catch (serverErr) {
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, normalizedEmail, pass);
+        if (cleanName) {
+          await updateProfile(cred.user, { displayName: cleanName }).catch(() => {});
+        }
+
+        const userRef = doc(db, 'users', cred.user.uid);
+        const newProfile: UserProfile = {
+          uid: cred.user.uid,
+          email: normalizedEmail,
+          displayName: cleanName || normalizedEmail.split('@')[0],
+          role: assignedRole,
+          createdAt: new Date().toISOString(),
+        };
+        await setDoc(userRef, newProfile);
+        setUser(newProfile);
+        setAuthProviderType('firebase');
+        localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(newProfile));
+        localStorage.removeItem(SERVER_TOKEN_KEY);
+
+        await auditService.log({
+          action: 'login',
+          user_id: cred.user.uid,
+          user_email: normalizedEmail,
+          user_role: assignedRole,
+          details: `New account registered with role: ${assignedRole}`,
+        });
+      } catch {
+        throw serverErr;
+      }
     }
   };
 
@@ -437,65 +452,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const switchDemoRole = async (role: UserRole) => {
-    if (auth.currentUser) {
-      const fb = auth.currentUser;
-      const updatedProfile: UserProfile = {
-        uid: fb.uid,
-        email: fb.email || user?.email || '',
-        displayName: fb.displayName || user?.displayName || 'Clinical User',
-        role,
-        createdAt: user?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      try {
-        await setDoc(
-          doc(db, 'users', fb.uid),
-          { role, updatedAt: updatedProfile.updatedAt },
-          { merge: true }
-        );
-        setUser(updatedProfile);
-        localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(updatedProfile));
-        await auditService.log({
-          action: 'role_change',
-          user_id: fb.uid,
-          user_email: updatedProfile.email,
-          user_role: role,
-          details: `Switched authenticated role perspective to ${role.toUpperCase()}`,
-        });
-      } catch (err) {
-        console.warn('Non-admin accounts cannot self-escalate Firestore roles:', err);
-      }
+    const cred = DEMO_CREDENTIALS[role];
+    try {
+      await serverLogin(cred.email, cred.pass);
       return;
-    }
-
-    const serverToken = localStorage.getItem(SERVER_TOKEN_KEY);
-    if (serverToken && user && !user.uid.startsWith('demo_')) {
-      try {
-        const res = await fetch('/api/auth/profile', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${serverToken}`,
-          },
-          body: JSON.stringify({ role }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.user) {
-          setUser(data.user);
-          localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(data.user));
-          await auditService.log({
-            action: 'role_change',
-            user_id: data.user.uid,
-            user_email: data.user.email,
-            user_role: data.user.role,
-            details: `Switched account role perspective to ${data.user.role.toUpperCase()}`,
-          });
-          return;
-        }
-      } catch {
-        // Fall through to demo switch if server call fails
-      }
+    } catch (e) {
+      console.warn('Backend login fallback for role sandbox:', e);
     }
 
     const demo = DEMO_USERS[role];
