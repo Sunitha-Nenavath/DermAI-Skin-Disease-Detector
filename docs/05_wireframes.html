@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermAI — UI Wireframes Specification</title>
+  <style>
+    :root {
+      --teal: #0E9F8E;
+      --teal-dark: #0B7C6E;
+      --teal-light: #E6F7F5;
+      --navy: #0B1F3A;
+      --navy-light: #16365C;
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --text-main: #0B1F3A;
+      --text-muted: #64748B;
+      --danger: #DC2626;
+      --danger-bg: #FEF2F2;
+      --warning: #D97706;
+      --warning-bg: #FFFBEB;
+      --success: #059669;
+      --success-bg: #ECFDF5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Top navigation header */
+    .top-header {
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(11, 31, 58, 0.15);
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      background: var(--teal);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .disclaimer-banner {
+      background: #FFFBEB;
+      border-bottom: 1px solid #FDE68A;
+      color: #92400E;
+      text-align: center;
+      font-size: 13px;
+      padding: 6px 16px;
+      font-weight: 500;
+    }
+
+    /* Wireframe Tab Controls */
+    .wireframe-nav {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 24px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: 1px solid transparent;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover {
+      background: var(--bg);
+      color: var(--navy);
+    }
+    .tab-btn.active {
+      background: var(--teal-light);
+      color: var(--teal-dark);
+      border-color: #A7F3D0;
+    }
+
+    /* Main Container */
+    .viewport {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 20px;
+    }
+
+    .screen-panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 32px;
+      animation: fadeIn 0.2s ease;
+    }
+    .screen-panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .section-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--navy);
+    }
+    .form-input, .form-select {
+      width: 100%;
+      max-width: 420px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      background: #FAFAFA;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--teal-dark);
+    }
+    .btn-secondary {
+      background: #F1F5F9;
+      color: var(--navy);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #E2E8F0;
+    }
+
+    /* Metric Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Table */
+    .table-container {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #F1F5F9;
+      padding: 10px 14px;
+      font-weight: 600;
+      color: var(--navy);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAFA; }
+
+    /* Quality Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-good { background: var(--success-bg); color: var(--success); border: 1px solid #A7F3D0; }
+    .badge-acceptable { background: var(--warning-bg); color: var(--warning); border: 1px solid #FDE68A; }
+    .badge-poor { background: var(--danger-bg); color: var(--danger); border: 1px solid #FECACA; }
+
+    /* Upload Zone */
+    .dropzone {
+      border: 2px dashed #CBD5E1;
+      border-radius: 8px;
+      background: #F8FAFC;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-bottom: 20px;
+    }
+    .dropzone:hover {
+      border-color: var(--teal);
+      background: var(--teal-light);
+    }
+
+    /* Side-by-side Inspection */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .image-frame {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      background: #F8FAFC;
+    }
+    .image-placeholder {
+      background: #E2E8F0;
+      border-radius: 6px;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    /* Footer Notice */
+    .app-footer {
+      margin-top: 40px;
+      padding: 20px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Clinical Notice Header -->
+  <div class="disclaimer-banner">
+    Notice: AI-assisted analysis, not a standalone medical diagnosis. For clinical decision-support and screening research only.
+  </div>
+
+  <header class="top-header">
+    <div class="brand-title">
+      <span>DermAI</span>
+      <span class="brand-badge">Milestone 1 Core</span>
+    </div>
+    <div style="font-size: 13px; color: #94A3B8;">
+      Role: <strong style="color: #fff;">Clinician (Dr. Sarah Chen)</strong>
+    </div>
+  </header>
+
+  <!-- Wireframe Switcher Tabs -->
+  <nav class="wireframe-nav">
+    <button class="tab-btn active" onclick="showScreen('dash')">1. Dashboard</button>
+    <button class="tab-btn" onclick="showScreen('cases')">2. Case List</button>
+    <button class="tab-btn" onclick="showScreen('newcase')">3. New Case Form</button>
+    <button class="tab-btn" onclick="showScreen('upload')">4. Image Intake & Quality Check</button>
+    <button class="tab-btn" onclick="showScreen('compare')">5. Preprocessing Comparison</button>
+    <button class="tab-btn" onclick="showScreen('login')">6. Login</button>
+    <button class="tab-btn" onclick="showScreen('register')">7. Register</button>
+  </nav>
+
+  <main class="viewport">
+
+    <!-- Screen 1: Dashboard -->
+    <section id="dash" class="screen-panel active">
+      <h2 class="section-title">Clinical Screening Dashboard</h2>
+      <p class="section-sub">Overview of active patient cohorts, intake quality assessment, and lesion cases.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Cases</div>
+          <div class="stat-value">48</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Quality Passed</div>
+          <div class="stat-value" style="color: var(--teal-dark);">91.7%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Images Processed</div>
+          <div class="stat-value">114</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Reviews</div>
+          <div class="stat-value" style="color: var(--warning);">7</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--navy);">Recent Cases</h3>
+        <button class="btn btn-primary" onclick="showScreen('newcase')">+ Create New Case</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Case Code</th>
+              <th>Anatomical Site</th>
+              <th>Patient Code</th>
+              <th>Image Quality</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CASE-2026-0081</strong></td>
+              <td>Upper Extremity (Forearm)</td>
+              <td>PAT-4819 (Male, 54)</td>
+              <td><span class="badge badge-good">Good (Score: 94)</span></td>
+              <td>Pending Clinical Review</td>
+              <td>2026-10-24</td>
+            </tr>
+            <tr>
+              <td><strong>CASE-2026-0080</strong></td>
+              <td>Back (Upper Scapular)</td>
+              <td>PAT-2301 (Female, 38)</td>
+              <td><span class="badge badge-acceptable">Acceptable (Score: 78)</span></td>
+              <td>Preprocessed</td>
+              <td>2026-10-23</td>
+            </tr>
+            <tr>
+              <td><strong>CASE-2026-0079</strong></td>
+              <td>Lower Extremity (Shin)</td>
+              <td>PAT-9912 (Male, 67)</td>
+              <td><span class="badge badge-poor">Poor (Blur detected)</span></td>
+              <td>Recapture Requested</td>
+              <td>2026-10-22</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Screen 2: Case List -->
+    <section id="cases" class="screen-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h2 class="section-title">Skin Lesion Case Registry</h2>
+          <p class="section-sub">De-identified dermatological case repository with date and status filters.</p>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('newcase')">+ New Case</button>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <input type="text" placeholder="Filter by Case Code..." class="form-input" style="max-width: 260px;">
+        <select class="form-select" style="max-width: 200px;">
+          <option>All Statuses</option>
+          <option>Pending Review</option>
+          <option>Quality Passed</option>
+          <option>Quality Rejected</option>
+        </select>
+        <select class="form-select" style="max-width: 200px;">
+          <option>All Body Locations</option>
+          <option>Back</option>
+          <option>Lower Extremity</option>
+          <option>Trunk</option>
+          <option>Upper Extremity</option>
+          <option>Abdomen</option>
+          <option>Face</option>
+          <option>Chest</option>
+          <option>Scalp</option>
+          <option>Neck</option>
+        </select>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Case Code</th>
+              <th>Title / Chief Complaint</th>
+              <th>Location</th>
+              <th>Images</th>
+              <th>Quality Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CASE-2026-A101</strong></td>
+              <td>Irregular pigmented macule on shoulder</td>
+              <td>Trunk</td>
+              <td>2 files</td>
+              <td><span class="badge badge-good">Good</span></td>
+              <td><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="showScreen('compare')">Inspect Images</button></td>
+            </tr>
+            <tr>
+              <td><strong>CASE-2026-A102</strong></td>
+              <td>Erythematous scaly plaque on cheek</td>
+              <td>Face</td>
+              <td>1 file</td>
+              <td><span class="badge badge-poor">Poor (Retake)</span></td>
+              <td><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="showScreen('upload')">Re-upload</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Screen 3: New Case Form -->
+    <section id="newcase" class="screen-panel">
+      <h2 class="section-title">Create De-Identified Lesion Case</h2>
+      <p class="section-sub">Initiate a case record. Real patient names or PII must never be entered.</p>
+
+      <form onsubmit="event.preventDefault(); showScreen('upload');" style="max-width: 560px;">
+        <div class="form-group">
+          <label class="form-label">Case Title / Clinical Concern *</label>
+          <input type="text" class="form-input" style="max-width: 100%;" placeholder="e.g. Asymmetrical pigmented border, left calf" required value="Dark pigmented macule with irregular borders">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Body Location (HAM10000 Aligned) *</label>
+            <select class="form-select" style="max-width: 100%;">
+              <option>back</option>
+              <option selected>lower extremity</option>
+              <option>trunk</option>
+              <option>upper extremity</option>
+              <option>abdomen</option>
+              <option>face</option>
+              <option>chest</option>
+              <option>scalp</option>
+              <option>neck</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">De-Identified Patient Code</label>
+            <input type="text" class="form-input" style="max-width: 100%;" value="PAT-2026-9481">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Patient Age (Years)</label>
+            <input type="number" class="form-input" style="max-width: 100%;" value="52">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Patient Gender</label>
+            <select class="form-select" style="max-width: 100%;">
+              <option>female</option>
+              <option selected>male</option>
+              <option>other</option>
+              <option>unknown</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Clinical Intake Notes & History</label>
+          <textarea class="form-input" style="max-width: 100%; height: 80px; resize: vertical;" placeholder="Lesion evolution, bleeding, itching, sun exposure...">Patient notes lesion darkening over past 4 months. Mild itching reported. No prior melanoma history.</textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary">Save & Proceed to Image Intake</button>
+          <button type="button" class="btn btn-secondary" onclick="showScreen('cases')">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Screen 4: Image Intake & Quality Check -->
+    <section id="upload" class="screen-panel">
+      <h2 class="section-title">Mobile & Web Image Intake Gate</h2>
+      <p class="section-sub">Real-time image fidelity verification (blur, luminance, contrast, resolution).</p>
+
+      <div class="dropzone">
+        <div style="font-size: 36px; margin-bottom: 8px;">📷</div>
+        <div style="font-weight: 700; font-size: 16px; color: var(--navy);">Drag and Drop Lesion Photo or Click to Capture</div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">JPEG or PNG · Min 224x224 px · Max 10 MB</div>
+      </div>
+
+      <!-- Live Quality Evaluation Result Card -->
+      <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="font-size: 15px; font-weight: 700; color: var(--navy);">Automated Quality Screening Result</h4>
+          <span class="badge badge-good">Status: GOOD QUALITY (Passed)</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: var(--text-muted);">RESOLUTION</div>
+            <div style="font-weight: 700; font-size: 15px; color: var(--success);">600 x 450 px</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Threshold: &ge; 224x224</div>
+          </div>
+          <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: var(--text-muted);">BLUR (LAPLACIAN)</div>
+            <div style="font-weight: 700; font-size: 15px; color: var(--success);">214.5 (Sharp)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Threshold: &gt; 80.0</div>
+          </div>
+          <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: var(--text-muted);">BRIGHTNESS (MEAN)</div>
+            <div style="font-weight: 700; font-size: 15px; color: var(--success);">142.8 (Optimal)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Normal: 40 - 225</div>
+          </div>
+          <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: var(--text-muted);">CONTRAST (STD DEV)</div>
+            <div style="font-weight: 700; font-size: 15px; color: var(--success);">48.2 (Adequate)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Threshold: &gt; 25.0</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-primary" onclick="showScreen('compare')">Confirm & Run Preprocessing Pipeline</button>
+          <button class="btn btn-secondary">Retake Photo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Preprocessing Comparison -->
+    <section id="compare" class="screen-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 class="section-title">Lesion Inspection: Raw Capture vs Preprocessed Tensor</h2>
+          <p class="section-sub">Case CASE-2026-A101 · Hair Removal (DullRazor Blackhat) + CLAHE Contrast + ImageNet Standardization</p>
+        </div>
+        <span class="badge badge-good">Quality: GOOD</span>
+      </div>
+
+      <div class="compare-grid">
+        <div class="image-frame">
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px; color: var(--navy);">Original Capture (600x450 RGB)</div>
+          <div class="image-placeholder">
+            [Raw Camera Capture with Skin Tone & Fine Hair]
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Source: Mobile Camera (Rear lens) · File size: 248 KB · No filters applied
+          </div>
+        </div>
+
+        <div class="image-frame">
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px; color: var(--teal-dark);">Preprocessed Pipeline Output (224x224 RGB)</div>
+          <div class="image-placeholder" style="border: 2px solid var(--teal);">
+            [DullRazor Morphological Inpainted + CLAHE Enhanced + Normalized]
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Pipeline: Blackhat filter &rarr; Telea inpaint &rarr; CLAHE (clip=2.0) &rarr; Crop & 224x224 resize &rarr; Ready for Model Input
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding: 16px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px;">
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px;">Milestone Status</h4>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Milestone 1 Core Pipeline verified: Image intake validated, quality scored, hair removal inpainting executed, and model tensor ready. Deep learning classification and Grad-CAM explainability will be linked in Milestones 2 & 3.
+        </p>
+      </div>
+    </section>
+
+    <!-- Screen 6: Login -->
+    <section id="login" class="screen-panel">
+      <h2 class="section-title">Clinical & Research Portal Login</h2>
+      <p class="section-sub">Sign in with role-authenticated credentials (JWT Access Token).</p>
+
+      <form onsubmit="event.preventDefault(); showScreen('dash');" style="max-width: 380px;">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" value="clinician@dermai.local" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" value="••••••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 12px;">Sign In to DermAI</button>
+        <div style="text-align: center; margin-top: 16px; font-size: 13px;">
+          Don't have an account? <a href="#" style="color: var(--teal-dark); font-weight: 600;" onclick="showScreen('register')">Register here</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Screen 7: Register -->
+    <section id="register" class="screen-panel">
+      <h2 class="section-title">Create Account</h2>
+      <p class="section-sub">Select your clinical or research role.</p>
+
+      <form onsubmit="event.preventDefault(); showScreen('dash');" style="max-width: 420px;">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" placeholder="e.g. Dr. Alex Vance" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="name@institution.org" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select">
+            <option>patient</option>
+            <option selected>clinician</option>
+            <option>researcher</option>
+            <option>ml_engineer</option>
+            <option>admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Min 8 characters" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 12px;">Create Account</button>
+      </form>
+    </section>
+
+    <footer class="app-footer">
+      <div>DermAI: Skin Disease Detector from Mobile Images Using Deep Learning</div>
+      <div style="margin-top: 4px; font-weight: 500; color: #94A3B8;">Notice: AI-assisted analysis, not a standalone medical diagnosis.</div>
+    </footer>
+  </main>
+
+  <script>
+    function showScreen(id) {
+      document.querySelectorAll('.screen-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dermai_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dermai_db}
+      POSTGRES_USER: ${POSTGRES_USER:-dermai_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dermai_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dermai_user} -d ${POSTGRES_DB:-dermai_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: dermai_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-dermai_user}:${POSTGRES_PASSWORD:-dermai_password}@db:5432/${POSTGRES_DB:-dermai_db}
+      - STORAGE_BACKEND=${STORAGE_BACKEND:-local}
+      - LOCAL_STORAGE_DIR=/app/backend/storage
+      - JWT_SECRET=${JWT_SECRET:-dermai_clinical_insecure_development_secret_replace_in_production_38a0f}
+      - JWT_ALGORITHM=HS256
+      - DEMO_PATIENT_PASSWORD=${DEMO_PATIENT_PASSWORD:-PatientSecure123!}
+      - DEMO_CLINICIAN_PASSWORD=${DEMO_CLINICIAN_PASSWORD:-ClinicianDoctor123!}
+      - DEMO_RESEARCHER_PASSWORD=${DEMO_RESEARCHER_PASSWORD:-ResearchScience123!}
+      - DEMO_ML_ENGINEER_PASSWORD=${DEMO_ML_ENGINEER_PASSWORD:-MLEngineerModel123!}
+      - DEMO_ADMIN_PASSWORD=${DEMO_ADMIN_PASSWORD:-AdminSuperUser123!}
+    volumes:
+      - ./backend/storage:/app/backend/storage
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  minio:
+    image: minio/minio:latest
+    container_name: dermai_minio
+    restart: unless-stopped
+    profiles:
+      - minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  minio_data:

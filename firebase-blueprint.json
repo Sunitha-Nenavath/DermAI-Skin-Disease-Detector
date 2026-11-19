@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access control metadata.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["patient", "clinician", "researcher", "ml_engineer", "admin"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Case": {
+      "title": "Case",
+      "description": "De-identified patient case containing lesion information and clinical notes.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "case_code": { "type": "string", "maxLength": 32 },
+        "title": { "type": "string", "maxLength": 128 },
+        "body_location": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["pending_review", "quality_passed", "quality_rejected", "analysis_completed", "requires_clinical_review", "closed"] },
+        "owner_id": { "type": "string", "maxLength": 128 },
+        "owner_name": { "type": "string", "maxLength": 128 },
+        "age": { "type": "number" },
+        "gender": { "type": "string", "maxLength": 32 },
+        "medical_history": { "type": "string", "maxLength": 1000 },
+        "allergies": { "type": "string", "maxLength": 500 },
+        "clinical_notes": { "type": "string", "maxLength": 2000 },
+        "image_url": { "type": "string" },
+        "storage_path": { "type": "string", "maxLength": 500 },
+        "quality_label": { "type": "string", "enum": ["Good", "Acceptable", "Poor"] },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["case_code", "title", "body_location", "status", "owner_id"]
+    },
+    "Analysis": {
+      "title": "Analysis",
+      "description": "AI-assisted screening inference or classical baseline analysis result.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "case_id": { "type": "string", "maxLength": 64 },
+        "model_version": { "type": "string", "maxLength": 64 },
+        "confidence": { "type": "number" },
+        "risk_tag": { "type": "string", "enum": ["Low", "Moderate", "High", "Requires Clinical Review"] },
+        "latency_ms": { "type": "number" },
+        "disclaimer": { "type": "string", "maxLength": 256 },
+        "created_at": { "type": "string" }
+      },
+      "required": ["case_id", "model_version", "disclaimer"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "HIPAA/compliance audit trail for all clinical actions, logins, analyses, and role updates.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "action": { "type": "string", "enum": ["login", "case_create", "upload", "analysis", "report_download", "role_change"] },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "user_email": { "type": "string", "maxLength": 256 },
+        "user_role": { "type": "string", "maxLength": 64 },
+        "target_id": { "type": "string", "maxLength": 128 },
+        "details": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["action", "user_id", "timestamp"]
+    },
+    "ModelRecord": {
+      "title": "ModelRecord",
+      "description": "Deep learning model version registry entry with training architecture and validation metrics.",
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 128 },
+        "architecture": { "type": "string", "maxLength": 128 },
+        "dataset_version": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["active", "inactive", "rollback"] },
+        "created_at": { "type": "string" }
+      },
+      "required": ["version", "name", "architecture", "status"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app clinical notification with severity levels.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 128 },
+        "message": { "type": "string", "maxLength": 500 },
+        "level": { "type": "string", "enum": ["Informational", "Low", "Medium", "High"] },
+        "read": { "type": "boolean" },
+        "case_id": { "type": "string", "maxLength": 64 },
+        "created_at": { "type": "string" }
+      },
+      "required": ["user_id", "title", "message", "level"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile with role assignment."
+    },
+    "/cases/{caseId}": {
+      "schema": { "$ref": "#/entities/Case" },
+      "description": "Dermatology screening cases."
+    },
+    "/analyses/{analysisId}": {
+      "schema": { "$ref": "#/entities/Analysis" },
+      "description": "AI analysis results and classical segmentation masks."
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "HIPAA-compliant system audit records."
+    },
+    "/models/{modelId}": {
+      "schema": { "$ref": "#/entities/ModelRecord" },
+      "description": "Registered model versions and active status."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "User in-app notifications."
+    }
+  }
+}

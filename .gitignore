@@ -1,0 +1,107 @@
+﻿# ==============================================================================
+# DermAI .gitignore
+# ==============================================================================
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+.auth_users.json
+.session_secret
+
+# --- Python & Bytecode ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Testing & Coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+nosetests.xml
+
+# --- Database & Local Storage ---
+*.db
+*.sqlite
+*.sqlite3
+dermai.db
+backend/storage/images/
+data/storage/
+
+# --- Large Datasets & Raw Images (Git-Ignored) ---
+data/raw/
+data/processed/
+data/ham10000/
+data/isic2018/
+data/splits/*.csv
+
+# --- Model Checkpoints & Weights (Git-Ignored) ---
+models/
+ml/weights/
+*.pt
+*.pth
+*.onnx
+*.bin
+*.tflite
+*.safetensors
+mlruns/
+lightning_logs/
+
+# --- Node.js & Web Frontend ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+dist/
+dist-ssr/
+*.local
+.eslintcache
+
+# --- OS & Editor Artifacts ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~

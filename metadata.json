@@ -1,0 +1,6 @@
+{
+  "name": "DermAI: Skin Disease Detector",
+  "description": "AI-assisted dermatological screening and skin lesion analysis platform for mobile and web images using deep learning pipelines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
