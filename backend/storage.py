@@ -87,5 +87,8 @@ class StorageManager:
                     return f.read()
         return None
 
+    # Alias for convenience
+    read = get_image_bytes
+
 
 storage = StorageManager()

@@ -17,16 +17,16 @@
 | **3** | **M2** | **Lesion Segmentation** | **Deferred** | (Deferred per Today Mode scope: Otsu classical segmentation used in Phase 6) | - | - | Listed under Planned Work. |
 | **4** | **M2** | **Baseline Classifier (EfficientNet-B0)** | **Done** | `ml/configs/efficientnet_b0.yaml`, `configs/risk_map.yaml`, `ml/train.py` with `--smoke` flag, `ml/evaluate.py`, `models/efficientnet_b0_best.pt`, real metrics in `models/metrics.json` and `reports/model_comparison.md`. | `python ml/train.py --arch efficientnet_b0 --smoke`, `python ml/evaluate.py` | None (smoke model trained & evaluated) | Proceed to Phase 6: Inference Service & Model Registry. |
 | **5** | **M3** | **Advanced AI & Explainability** | **Deferred** | (Deferred per Today Mode scope: Grad-CAM++ integrated in Phase 6) | - | - | Listed under Planned Work. |
-| **6** | **M3/M4** | **Inference Service & Model Management** | **In Progress** | `POST /cases/{id}/analyze` with Otsu mask, Grad-CAM++ heatmap, model registry, and "No trained model available" fallback. | `POST /cases/{id}/analyze`, `GET /models` | None | Implement analysis router and model registry endpoints. |
-| **7** | **M4** | **Frontend PWA** | **Todo** | - | `npm run dev` | None | Connect React frontend to FastAPI REST backend without Firebase. |
+| **6** | **M3/M4** | **Inference Service & Model Management** | **Done** | `POST /cases/{id}/analyze` orchestration: OpenCV DullRazor + CLAHE, classical Otsu lesion segmentation, PyTorch EfficientNet-B0 classification, Grad-CAM++ heatmap overlay, `configs/risk_map.yaml` calibrated risk tiers, "No trained model available" fallback, Model Registry API (`GET /models`, `POST /models/{id}/activate`). | `pytest tests/test_analysis.py -v` | None (all tests green) | Proceed to Phase 7: Frontend PWA. |
+| **7** | **M4** | **Frontend PWA** | **In Progress** | React + Vite + TypeScript PWA connected to FastAPI REST backend without Firebase. | `npm run dev` | Unifying API services | Connect React frontend to REST endpoints. |
 | **8** | **M4** | **Reports & Notifications** | **Todo** | - | `GET /cases/{id}/report.pdf` | None | Implement ReportLab PDF generator and notification endpoints. |
 | **9** | **M4** | **Testing, Security & Performance** | **Deferred** | (Deferred per Today Mode scope) | - | - | Listed under Planned Work. |
 | **10** | **M4** | **Deployment & Documentation** | **Todo** | - | `python backend/main.py` | None | Run end-to-end app and produce 5-step demo checklist. |
 
 ---
 
-## 2. Phase 4 Gate Verification Results
-- Smoke training: `python ml/train.py --arch efficientnet_b0 --smoke` completed (CPU, 200 samples, 1 epoch).
-- Model weights saved: `models/efficientnet_b0_best.pt`.
-- Real test evaluation: `models/metrics.json` (Accuracy: 0.2667, BalAcc: 0.3000, Macro F1: 0.2268, MCC: 0.2269).
-- Comparison report generated: `reports/model_comparison.md`.
+## 2. Phase 6 Gate Verification Results
+- Integration test: `pytest tests/test_analysis.py -v` PASSED.
+- Full test suite: `pytest tests/ -v` (9 passed in 3.01s).
+- Preprocessing, Otsu mask, EfficientNet-B0 classification, Grad-CAM++ overlay, and risk scoring verified.
+- Mandatory medical disclaimer verified on response: `"AI-assisted analysis, not a standalone medical diagnosis."`

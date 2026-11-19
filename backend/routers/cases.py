@@ -15,13 +15,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from backend.database import get_db
-from backend.models import User, Case, Patient, Image, UserRole, CaseStatus, QualityLabel
+from backend.models import User, Case, Patient, Image, Analysis, Notification, UserRole, CaseStatus, QualityLabel
 from backend.schemas import (
     CaseCreate, CaseUpdate, CaseResponse, NoteCreate, ImageUploadResponse, ImageDetailResponse
 )
 from backend.auth import get_current_user, log_audit_event, get_client_ip
 from backend.quality import validate_and_assess_image
 from backend.storage import storage
+from backend.ml_service import ml_engine
 
 router = APIRouter(prefix="/cases", tags=["Case Management"])
 
@@ -420,5 +421,159 @@ def get_case_images(
             "file_url": f"/api/images/{img.id}/file",
             "preprocess_url": f"/api/images/{img.id}/preprocess",
             "medical_disclaimer": "AI-assisted analysis, not a standalone medical diagnosis."
+        })
+    return results
+
+
+@router.post("/{id}/analyze")
+def analyze_case(
+    id: int,
+    image_id: Optional[int] = None,
+    request: Request = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Executes AI screening analysis:
+    - Preprocessing (DullRazor + CLAHE + center crop)
+    - Otsu lesion detection
+    - PyTorch classification (EfficientNet-B0) with Top-3 predictions
+    - Grad-CAM++ explainability heatmap
+    - Calibrated risk assessment & mandatory medical disclaimer
+    """
+    case = db.query(Case).filter(Case.id == id).first()
+    if not case:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found.")
+
+    if current_user.role == UserRole.PATIENT.value and case.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied.")
+
+    # Find target image
+    if image_id:
+        target_image = db.query(Image).filter(Image.id == image_id, Image.case_id == id).first()
+    else:
+        target_image = db.query(Image).filter(Image.case_id == id).order_by(desc(Image.id)).first()
+
+    if not target_image:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No uploaded image found for this case. Please upload a skin photo before requesting analysis."
+        )
+
+    # Image quality check
+    if target_image.quality_label == QualityLabel.POOR.value:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Cannot analyze an image labeled as Poor quality. Please recapture the lesion with improved focus and lighting."
+        )
+
+    # Check if a trained model is available on disk
+    if not ml_engine.is_model_available():
+        return {
+            "success": False,
+            "trained_model_available": False,
+            "message": "No trained model available",
+            "disclaimer": "AI-assisted analysis, not a standalone medical diagnosis."
+        }
+
+    # Load image bytes from storage
+    image_bytes = storage.read(target_image.storage_key)
+    if not image_bytes:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve stored image bytes.")
+
+    # Run analysis
+    try:
+        analysis_result = ml_engine.analyze_image_bytes(image_bytes)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Inference error: {str(e)}")
+
+    if not analysis_result.get("success"):
+        return analysis_result
+
+    # Save Analysis record
+    analysis_record = Analysis(
+        case_id=case.id,
+        image_id=target_image.id,
+        status="completed",
+        model_version=analysis_result.get("model_version", "v1.0-efficientnet_b0"),
+        predicted_condition=analysis_result.get("predicted_condition"),
+        confidence=analysis_result.get("confidence"),
+        risk_category=analysis_result.get("risk_category"),
+        prediction_json=json.dumps(analysis_result),
+        disclaimer="AI-assisted analysis, not a standalone medical diagnosis."
+    )
+    db.add(analysis_record)
+
+    # Update case status
+    case.status = CaseStatus.ANALYSIS_COMPLETED.value
+
+    # Create user notification
+    notif = Notification(
+        user_id=current_user.id,
+        case_id=case.id,
+        title=f"AI Screening Complete: {analysis_result['predicted_condition']}",
+        message=f"Case {case.case_code} was analyzed. Risk Tag: {analysis_result['risk_category']}. AI-assisted analysis, not a standalone medical diagnosis.",
+        level="High" if "High" in analysis_result['risk_category'] else "Medium",
+        is_read=False,
+        disclaimer="AI-assisted analysis, not a standalone medical diagnosis."
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(analysis_record)
+
+    # Audit log
+    ip = get_client_ip(request)
+    log_audit_event(
+        db=db,
+        action="ANALYSIS",
+        entity="case",
+        entity_id=str(case.id),
+        user_id=current_user.id,
+        ip=ip
+    )
+
+    return {
+        "id": analysis_record.id,
+        "case_id": case.id,
+        "image_id": target_image.id,
+        "created_at": analysis_record.created_at,
+        **analysis_result
+    }
+
+
+@router.get("/{id}/analyses")
+def get_case_analyses(
+    id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    case = db.query(Case).filter(Case.id == id).first()
+    if not case:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found.")
+
+    if current_user.role == UserRole.PATIENT.value and case.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied.")
+
+    analyses = db.query(Analysis).filter(Analysis.case_id == id).order_by(desc(Analysis.id)).all()
+    results = []
+    for a in analyses:
+        payload = {}
+        if a.prediction_json:
+            try:
+                payload = json.loads(a.prediction_json)
+            except Exception:
+                pass
+        results.append({
+            "id": a.id,
+            "case_id": a.case_id,
+            "image_id": a.image_id,
+            "status": a.status,
+            "model_version": a.model_version,
+            "predicted_condition": a.predicted_condition,
+            "confidence": a.confidence,
+            "risk_category": a.risk_category,
+            "created_at": a.created_at,
+            "disclaimer": a.disclaimer,
+            "details": payload
         })
     return results
