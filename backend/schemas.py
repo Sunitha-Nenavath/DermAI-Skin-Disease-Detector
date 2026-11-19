@@ -28,6 +28,7 @@ class UserLogin(BaseModel):
 
 class Token(DermAIBaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str = "bearer"
     user_id: int
     email: str
@@ -168,3 +169,38 @@ class AuditLogResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# --- Notification Schemas ---
+class NotificationResponse(DermAIBaseModel):
+    id: int
+    user_id: int
+    case_id: Optional[int] = None
+    title: str
+    message: str
+    level: str
+    is_read: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# --- Model Registry Schemas ---
+class ModelRegistryResponse(DermAIBaseModel):
+    id: int
+    name: str
+    version: str
+    architecture: str
+    weights_path: Optional[str] = None
+    is_active: bool
+    accuracy: Optional[float] = None
+    balanced_accuracy: Optional[float] = None
+    macro_f1: Optional[float] = None
+    metrics_json: Optional[str] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str

@@ -1,7 +1,7 @@
-"""
+﻿"""
 backend/models.py
 SQLAlchemy 2 database models for DermAI.
-Tables: users, patients, cases, images, analyses, audit_logs.
+Tables: users, patients, cases, images, analyses, audit_logs, notifications, models.
 """
 
 from datetime import datetime
@@ -26,6 +26,7 @@ class CaseStatus(str, PyEnum):
     QUALITY_PASSED = "quality_passed"
     QUALITY_REJECTED = "quality_rejected"
     ANALYSIS_QUEUED = "analysis_queued"
+    ANALYSIS_COMPLETED = "analysis_completed"
     CLOSED = "closed"
 
 
@@ -55,6 +56,7 @@ class User(Base):
     cases = relationship("Case", back_populates="owner", cascade="all, delete-orphan")
     created_patients = relationship("Patient", back_populates="creator")
     audit_logs = relationship("AuditLog", back_populates="user")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
 
 
 class Patient(Base):
@@ -121,8 +123,7 @@ class Image(Base):
 
 class Analysis(Base):
     """
-    Reserved for Milestones 2–4 deep learning predictions and Grad-CAM maps.
-    Empty for Milestone 1.
+    Stores deep learning screening predictions, segmentation mask, and Grad-CAM heatmap.
     """
     __tablename__ = "analyses"
 
@@ -131,7 +132,13 @@ class Analysis(Base):
     image_id = Column(Integer, ForeignKey("images.id"), nullable=False, index=True)
     status = Column(String(32), default="pending", nullable=False)  # pending, completed, failed
     model_version = Column(String(64), nullable=True)
-    prediction_json = Column(Text, nullable=True)  # JSON predictions, confidences
+    predicted_condition = Column(String(64), nullable=True)
+    confidence = Column(Float, nullable=True)
+    risk_category = Column(String(32), nullable=True)
+    prediction_json = Column(Text, nullable=True)  # JSON predictions, top3, confidences
+    mask_storage_key = Column(String(512), nullable=True)
+    heatmap_storage_key = Column(String(512), nullable=True)
+    disclaimer = Column(String(255), default="AI-assisted analysis, not a standalone medical diagnosis.", nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
@@ -139,13 +146,46 @@ class Analysis(Base):
     image = relationship("Image", back_populates="analyses")
 
 
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    case_id = Column(Integer, ForeignKey("cases.id"), nullable=True)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    level = Column(String(32), default="Informational", nullable=False)  # Informational, Low, Medium, High, Critical
+    is_read = Column(Boolean, default=False, nullable=False)
+    disclaimer = Column(String(255), default="AI-assisted analysis, not a standalone medical diagnosis.", nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    # Relationships
+    user = relationship("User", back_populates="notifications")
+
+
+class ModelRegistry(Base):
+    __tablename__ = "models"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(128), nullable=False)
+    version = Column(String(64), unique=True, nullable=False)
+    architecture = Column(String(64), nullable=False)
+    weights_path = Column(String(512), nullable=True)
+    is_active = Column(Boolean, default=False, nullable=False)
+    accuracy = Column(Float, nullable=True)
+    balanced_accuracy = Column(Float, nullable=True)
+    macro_f1 = Column(Float, nullable=True)
+    metrics_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
-    action = Column(String(64), nullable=False, index=True)  # REGISTER, LOGIN, CASE_CREATE, IMAGE_UPLOAD, NOTE_ADD
-    entity = Column(String(64), nullable=False)  # user, patient, case, image
+    action = Column(String(64), nullable=False, index=True)  # REGISTER, LOGIN, CASE_CREATE, IMAGE_UPLOAD, NOTE_ADD, ANALYSIS, REPORT_DOWNLOAD
+    entity = Column(String(64), nullable=False)  # user, patient, case, image, report, analysis
     entity_id = Column(String(64), nullable=True)
     ip = Column(String(45), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
