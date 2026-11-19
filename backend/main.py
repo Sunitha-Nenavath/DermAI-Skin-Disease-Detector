@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from backend.config import settings
 from backend.database import engine, Base
 from backend.models import *  # ensure all models are registered
-from backend.routers import auth, users, cases, images, models
+from backend.routers import auth, users, cases, images, models, reports, notifications
 
 # Create tables automatically for SQLite/Postgres
 Base.metadata.create_all(bind=engine)
@@ -65,6 +65,8 @@ app.include_router(cases.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
 app.include_router(models.router, prefix="/api")
 app.include_router(models.ml_router, prefix="/api")
+app.include_router(reports.router, prefix="/api")
+app.include_router(notifications.router, prefix="/api")
 
 # Also include at root for direct /auth, /cases, /images path access
 app.include_router(auth.router)
@@ -73,6 +75,9 @@ app.include_router(cases.router)
 app.include_router(images.router)
 app.include_router(models.router)
 app.include_router(models.ml_router)
+app.include_router(reports.router)
+app.include_router(notifications.router)
+
 
 
 

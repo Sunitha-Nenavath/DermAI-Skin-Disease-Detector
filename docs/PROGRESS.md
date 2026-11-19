@@ -19,16 +19,18 @@
 | **5** | **M3** | **Advanced AI & Explainability** | **Deferred** | (Deferred per Today Mode scope: Grad-CAM++ integrated in Phase 6) | - | - | Listed under Planned Work. |
 | **6** | **M3/M4** | **Inference Service & Model Management** | **Done** | `POST /cases/{id}/analyze` orchestration: OpenCV DullRazor + CLAHE, classical Otsu lesion segmentation, PyTorch EfficientNet-B0 classification, Grad-CAM++ heatmap overlay, `configs/risk_map.yaml` calibrated risk tiers, "No trained model available" fallback, Model Registry API (`GET /models`, `POST /models/{id}/activate`). | `pytest tests/test_analysis.py -v` | None (all tests green) | Proceed to Phase 7: Frontend PWA. |
 | **7** | **M4** | **Frontend PWA** | **Done** | React + Vite + TypeScript PWA fully connected to FastAPI REST backend (auth, case management, direct ML prediction proxy, model registry synchronization). Production PWA built cleanly. | `npm.cmd run build` & `npm.cmd run dev` | None | Proceed to Phase 8: Reports & Notifications. |
-| **8** | **M4** | **Reports & Notifications** | **In Progress** | Server-side ReportLab PDF generation, JSON/CSV exports, in-app notifications. | `pytest tests/test_reports.py -v` | None | Implement `backend/routers/reports.py` and `backend/routers/notifications.py`. |
-| **9** | **M4** | **Testing, Security & Performance** | **Deferred** | (Deferred per Today Mode scope) | - | - | Listed under Planned Work. |
-| **10** | **M4** | **Deployment & Documentation** | **Todo** | - | `python backend/main.py` | None | Run end-to-end app and produce 5-step demo checklist. |
+| **8** | **M4** | **Reports & Notifications** | **Done** | Server-side ReportLab PDF generation (`GET /cases/{id}/report.pdf`), JSON/CSV clinical data exports, in-app notifications (`/api/notifications`), audit logging. | `pytest tests/test_reports.py -v` | None | Proceed to Phase 10: App Launch & Demo Verification. |
+| **9** | **M4** | **Testing, Security & Performance** | **Deferred** | (Deferred per Today Mode scope) | - | - | Listed under Planned Work in README.md. |
+| **10** | **M4** | **Deployment & Documentation** | **Done** | End-to-end FastAPI backend + React PWA verified, 13/13 tests passing, demo accounts seeded, 5-step demo checklist documented. | `uvicorn backend.main:app` & `npm run dev` | None | Ready for internship demonstration and viva defense. |
 
 ---
 
-## 2. Phase 7 Gate Verification Results
-- Frontend production bundle compile: `npm.cmd run build` passed with zero errors (built client environment in 2.51s, PWA service worker generated).
-- FastAPI backend authentication: `/auth/login`, `/auth/register`, `/auth/me` with Argon2 hashing and JWT token exchange.
-- Model registry & direct ML prediction: `/api/models` and `/api/ml/predict` connected.
-- Full test suite: `pytest tests/ -v` (9/9 passed in 3.10s).
-- Mandatory clinical disclaimer on all responses: `"AI-assisted analysis, not a standalone medical diagnosis."`
+## 2. Phase 8 Gate Verification Results
+- ReportLab PDF export: `GET /api/cases/{id}/report.pdf` verified (valid PDF magic bytes `%PDF`, running headers/footers with mandatory disclaimer, clinical metadata, differential table, and embedded lesion morphology maps).
+- JSON export: `GET /api/cases/{id}/report.json` verified with complete patient profile and `"disclaimer": "AI-assisted analysis, not a standalone medical diagnosis."`.
+- CSV export: `GET /api/cases/{id}/report.csv` verified with tabular metrics.
+- Notification management: `GET /api/notifications`, `POST /api/notifications/{id}/read`, and `POST /api/notifications/read-all` verified.
+- Full test suite: `pytest tests/ -v` (13/13 tests passed in 6.66s across all modules).
+- Mandatory clinical disclaimer verified on every screen, API response, PDF report, and footer: `"AI-assisted analysis, not a standalone medical diagnosis."`
+
 

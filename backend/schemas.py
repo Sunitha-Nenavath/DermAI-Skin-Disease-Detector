@@ -11,6 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field
 # Base model with standard medical disclaimer
 class DermAIBaseModel(BaseModel):
     medical_disclaimer: str = "AI-assisted analysis, not a standalone medical diagnosis."
+    disclaimer: str = "AI-assisted analysis, not a standalone medical diagnosis."
+
 
 
 # --- Authentication Schemas ---

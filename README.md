@@ -1,114 +1,93 @@
 # DermAI: Skin Disease Detector from Mobile Images Using Deep Learning
 
-> **Clinical & Regulatory Notice**: **AI-assisted analysis, not a standalone medical diagnosis.** DermAI is an AI-assisted screening and clinical decision-support tool, NOT a diagnostic tool. In-person evaluation by a licensed dermatologist is mandatory. Use only public or de-identified demo data.
+> **Mandatory Clinical & Regulatory Notice**: **"AI-assisted analysis, not a standalone medical diagnosis."**  
+> DermAI is an AI-assisted screening, research, and clinical decision-support tool, **NOT** an autonomous diagnostic system. In-person clinical evaluation by a licensed medical provider is mandatory. Zero real patient data is used; only public, de-identified datasets (HAM10000, ISIC 2018) are supported.
 
 ---
 
-## 1. Architecture Overview
+## 1. System Architecture
 
-DermAI consists of two decoupled services:
+DermAI is built following the 19-module clinical specification from `docs/DermAI_spec.pdf`:
 
-1. **Full-Stack Web & PWA Application (`server.ts` + `src/`)**:
-   - **Frontend**: React 19, TypeScript, Tailwind CSS, React Router, Recharts, `jsPDF`, `vite-plugin-pwa` (installable PWA + `getUserMedia` rear camera capture).
-   - **Backend Server (`server.ts`)**: Node.js + Express serving Vite middleware in development and `dist/` in production, plus ML proxy endpoints (`GET /api/ml/status`, `POST /api/ml/predict`, `GET /api/health`).
-   - **Auth, Database & Storage**: Firebase Authentication (Email/Password & Google Sign-In), Cloud Firestore (multi-database), and Firebase Cloud Storage with strict security rules (`firestore.rules`, `storage.rules`).
-   - **Automatic DEMO MODE**: Whenever `ML_SERVICE_URL` is unset or unreachable, the app displays the Demo Mode banner, never fabricates model probabilities or labels, and still runs genuine client-side image validation, Laplacian blur/exposure/contrast quality screening, CLAHE preprocessing, and Otsu lesion segmentation.
-
-2. **PyTorch Deep Learning Training & Inference Microservice (`ml/`)**:
-   - `ml/train.py`: Complete HAM10000 training pipeline (`resnet50`, `efficientnet_b4`, `densenet121`, `vit_b16`) with `StratifiedGroupKFold` by `lesion_id` (zero leakage), inverse-frequency class weights, DullRazor + CLAHE preprocessing, checkpoint saving, and Colab evaluation JSON export (`colab_metrics_<arch>.json`).
-   - `ml/serve.py`: FastAPI REST inference server (`POST /predict`, multipart field `'image'`, `X-Model-Version` header) returning Top-3 probabilities, confidence, risk tags, Otsu ROI mask (`mask_png_base64`), live PyTorch Grad-CAM heatmap (`heatmap_png_base64`), and `latency_ms`.
-   - `ml/DermAI_Colab_Training.ipynb`: Ready-to-run Google Colab notebook for GPU training on HAM10000 and exporting trained `.pt` weights + Module 10 evaluation JSON.
-   - `ml/Dockerfile`: Cloud Run container definition for the standalone Python/PyTorch ML microservice.
+- **Backend API (FastAPI + SQLAlchemy 2 + Pydantic v2)**:
+  - **Authentication & RBAC**: Argon2 password hashing, JWT access & refresh tokens, role-based access control for 5 roles: `patient`, `clinician`, `researcher`, `ml_engineer`, `admin`.
+  - **Clinical Case & Patient Management**: Strictly de-identified patient metadata, role-isolated case workflows, clinical progress notes, and audit logs.
+  - **Image Quality Gate & CV Preprocessing**: Laplacian focus blur assessment, brightness/contrast validation, OpenCV DullRazor hair removal artifact reduction, CLAHE contrast enhancement, and standardized 224x224 tensor normalization.
+  - **Computer Vision & Inference Service**: Classical Otsu lesion segmentation, PyTorch `efficientnet_b0` classifier, Grad-CAM++ visual interpretability heatmaps, and `configs/risk_map.yaml` calibrated risk tiers.
+  - **Reporting & Notifications**: Server-side ReportLab clinical PDF generation, JSON/CSV exports, and in-app screening notifications.
+- **Frontend PWA (React + Vite + TypeScript + Tailwind CSS)**:
+  - Mobile-first responsive Progressive Web App with camera intake workflow, interactive lesion segmentation view, classification confidence distribution, Grad-CAM++ saliency overlays, model management registry, and longitudinal case history.
 
 ---
 
-## 2. Environment Variables
+## 2. Seeded Demo Accounts (Password: Argon2 Hashed)
 
-Configure `.env` (or Cloud Run env vars) from `.env.example`:
-
-```bash
-# Port for the Node.js + Express full-stack server
-PORT=3000
-
-# Optional PyTorch FastAPI ML Service URL (leave empty to run in truthful DEMO MODE)
-ML_SERVICE_URL=
-
-# Optional Demo Credentials (Module 16)
-VITE_DEMO_PATIENT_PASSWORD=
-VITE_DEMO_CLINICIAN_PASSWORD=
-VITE_DEMO_RESEARCHER_PASSWORD=
-VITE_DEMO_ML_PASSWORD=
-VITE_DEMO_ADMIN_PASSWORD=
-```
+| Role | Email | Password | Primary Capabilities |
+|---|---|---|---|
+| **Clinician** | `clinician@dermai.local` | `ClinicianDoctor123!` | Case registry, review, photo intake, AI screening, clinical notes, PDF export |
+| **Patient** | `patient@dermai.local` | `PatientSecure123!` | Self-case submission, own case history, photo intake |
+| **Researcher** | `researcher@dermai.local` | `ResearchScience123!` | Cohort-wide de-identified analytical access, EDA viewer |
+| **ML Engineer** | `ml_engineer@dermai.local` | `MLEngineerModel123!` | Model registry, risk threshold tuning, evaluation matrix |
+| **Admin** | `admin@dermai.local` | `AdminSuperUser123!` | User management, audit logs, administrative privileges |
 
 ---
 
-## 3. Running Locally
+## 3. Quick Start & Execution
 
+### Prerequisites
+- Python 3.11+ or 3.13+
+- Node.js v18+ and npm
+
+### Backend Setup & Launch
 ```bash
 # 1. Install dependencies
-npm install
+pip install -r backend/requirements.txt
 
-# 2. Start full-stack Express + Vite server on port 3000
+# 2. Seed demo user accounts
+python scripts/seed.py
+
+# 3. Launch FastAPI backend server (Port 8000)
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+- Interactive Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- Health Check: [http://localhost:8000/health](http://localhost:8000/health)
+
+### Frontend PWA Setup & Launch
+```bash
+# 1. Install dependencies
+npm install --legacy-peer-deps
+
+# 2. Start Vite development server (Port 3000)
 npm run dev
 ```
+- Web Application: [http://localhost:3000](http://localhost:3000)
 
-### Running the Separate PyTorch ML Microservice (Local or GPU Machine)
-
+### Run Test Suite
 ```bash
-pip install -r ml/requirements.txt
-
-# Train a model on downloaded HAM10000 data (produces weights & Colab metrics JSON)
-python -m ml.train --data-dir ./data/ham10000 --arch resnet50 --epochs 20 --output-dir ./ml/weights
-
-# Start FastAPI inference service on port 8001
-ML_WEIGHTS_DIR=./ml/weights uvicorn ml.serve:app --host 0.0.0.0 --port 8001
-
-# Point DermAI web server to the ML service
-export ML_SERVICE_URL=http://127.0.0.1:8001
-npm run dev
+# Run all 13 unit, integration, and contract tests
+python -m pytest tests/ -v
 ```
 
 ---
 
-## 4. Deploying to Google Cloud Run
-
-### Step 1: Deploy the PyTorch ML Service (`ml/Dockerfile`)
-Place your trained `.pt` checkpoints exported from `ml/train.py` or `ml/DermAI_Colab_Training.ipynb` inside `ml/weights/`, then deploy:
-
+## 4. Model Training Pipeline
 ```bash
-gcloud builds submit -f ml/Dockerfile --tag gcr.io/$PROJECT_ID/dermai-ml-service .
-gcloud run deploy dermai-ml-service \
-  --image gcr.io/$PROJECT_ID/dermai-ml-service \
-  --platform managed \
-  --region us-central1 \
-  --memory 4Gi \
-  --cpu 2 \
-  --allow-unauthenticated \
-  --port 8080
-```
+# Local smoke test (200 samples, 1 epoch, CPU):
+python ml/train.py --arch efficientnet_b0 --smoke
 
-### Step 2: Deploy the Full-Stack DermAI Web App (`Dockerfile`)
-Set `ML_SERVICE_URL` to the Cloud Run URL from Step 1 (or omit it to run in Demo Mode):
-
-```bash
-gcloud builds submit --tag gcr.io/$PROJECT_ID/dermai-app .
-gcloud run deploy dermai-app \
-  --image gcr.io/$PROJECT_ID/dermai-app \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --port 3000 \
-  --set-env-vars "ML_SERVICE_URL=https://dermai-ml-service-xxxx.a.run.app"
+# Evaluate model metrics and generate comparison report:
+python ml/evaluate.py
 ```
 
 ---
 
-## 5. Security Rules
+## 5. Planned Work (Deferred Items)
 
-Hardened Firestore (`firestore.rules`) and Cloud Storage (`storage.rules`) RBAC rules:
-- **patient**: Read/write only own cases, analyses, and images.
-- **clinician**: Read all cases and append clinical notes.
-- **researcher**: Read de-identified analyses/cases without editing clinical state.
-- **ml_engineer**: Manage model versions, metrics, evaluation JSON, and risk config tables.
-- **admin**: Manage `users/{uid}` roles, read immutable `audit_logs`, and run demo seeders.
+The following items from the 19-module specification are planned for subsequent milestones:
+1. **U-Net Deep Lesion Segmentation (Module 7)**: Training a dedicated U-Net / Attention U-Net on ISIC 2018 lesion masks to complement the classical Otsu segmentation pipeline.
+2. **Vision Transformer & Multi-Model Ensemble (Module 9)**: Training ViT-B/16, Swin Transformer, and DeiT checkpoints with weighted rank averaging ensemble.
+3. **Cross-Platform Mobile App with Expo (Module 15)**: Standalone native React Native / Expo application for iOS and Android.
+4. **End-to-End Automated Testing (Module 17)**: Full Playwright browser regression test suite across desktop and mobile viewports.
+5. **Distributed Load & Stress Testing (Module 18)**: Locust headless stress test benchmark simulating 200+ concurrent clinicians.
+6. **Production Cloud Deployment & Infrastructure (Module 19)**: Terraform AWS EKS / ECS deployment with RDS PostgreSQL 16 and MinIO S3 object storage.
+7. **Clinical Observability Stack (Module 19)**: Prometheus metrics collection, Grafana dashboards, and Alertmanager routing for inference latency and drift monitoring.
