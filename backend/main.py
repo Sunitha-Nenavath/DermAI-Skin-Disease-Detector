@@ -4,7 +4,7 @@ FastAPI application entry point for DermAI.
 """
 
 from datetime import datetime
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -48,14 +48,30 @@ async def add_medical_notice_header(request: Request, call_next):
 @app.get("/health")
 @app.get("/api/health")
 def health_check():
+    from backend.ml_service import ml_engine
+    loaded_models = []
+    if ml_engine.model is not None:
+        loaded_models.append("v1.0-efficientnet_b0")
     return {
         "status": "ok",
         "service": "dermai-api",
         "version": settings.APP_VERSION,
         "timestamp": datetime.utcnow().isoformat(),
         "storage_backend": settings.STORAGE_BACKEND,
+        "loaded_models": loaded_models,
+        "model_loaded": ml_engine.model is not None,
         "medical_disclaimer": settings.MEDICAL_DISCLAIMER,
     }
+
+
+# Direct predict endpoint for frontend/proxy compatibility
+@app.post("/predict")
+async def root_predict(image: UploadFile = File(...)):
+    from backend.ml_service import ml_engine
+    image_bytes = await image.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Empty image upload.")
+    return ml_engine.analyze_image_bytes(image_bytes)
 
 
 # Include modular routers under /api and root

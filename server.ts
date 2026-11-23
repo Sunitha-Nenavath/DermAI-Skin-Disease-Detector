@@ -372,16 +372,16 @@ function isSafeExternalUrl(rawUrl: string): boolean {
   }
 }
 
-function resolveMlServiceUrl(clientOverride?: string): { url: string | null; source: 'env' | 'override' | 'none' } {
+function resolveMlServiceUrl(clientOverride?: string): { url: string | null; source: 'env' | 'override' | 'default' | 'none' } {
   const envUrl = process.env.ML_SERVICE_URL?.trim();
   if (envUrl) {
     return { url: envUrl.replace(/\/$/, ''), source: 'env' };
   }
   const override = clientOverride?.trim();
-  if (override && isSafeExternalUrl(override)) {
+  if (override && (override.includes('localhost') || override.includes('127.0.0.1') || isSafeExternalUrl(override))) {
     return { url: override.replace(/\/$/, ''), source: 'override' };
   }
-  return { url: null, source: 'none' };
+  return { url: 'http://127.0.0.1:8000', source: 'default' };
 }
 
 // Platform health endpoints for Cloud Run & load balancers
@@ -485,14 +485,30 @@ app.post('/api/ml/predict', upload.single('image'), async (req, res) => {
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 30000);
-    const upstream = await fetch(`${url}/predict`, {
+    let upstream = await fetch(`${url}/predict`, {
       method: 'POST',
       headers: {
         'X-Model-Version': modelVersion,
       },
       body: outgoing,
       signal: controller.signal,
-    });
+    }).catch(() => null);
+
+    if (!upstream || !upstream.ok) {
+      const retryOutgoing = new FormData();
+      const retryBlob = new Blob([new Uint8Array(req.file.buffer)], {
+        type: req.file.mimetype || 'image/jpeg',
+      });
+      retryOutgoing.append('image', retryBlob, req.file.originalname || 'lesion.jpg');
+      upstream = await fetch(`${url}/api/ml/predict`, {
+        method: 'POST',
+        headers: {
+          'X-Model-Version': modelVersion,
+        },
+        body: retryOutgoing,
+        signal: controller.signal,
+      });
+    }
     clearTimeout(timer);
 
     if (!upstream.ok) {

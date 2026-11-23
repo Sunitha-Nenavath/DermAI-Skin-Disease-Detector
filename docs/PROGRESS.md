@@ -21,16 +21,17 @@
 | **7** | **M4** | **Frontend PWA** | **Done** | React + Vite + TypeScript PWA fully connected to FastAPI REST backend (auth, case management, direct ML prediction proxy, model registry synchronization). Production PWA built cleanly. | `npm.cmd run build` & `npm.cmd run dev` | None | Proceed to Phase 8: Reports & Notifications. |
 | **8** | **M4** | **Reports & Notifications** | **Done** | Server-side ReportLab PDF generation (`GET /cases/{id}/report.pdf`), JSON/CSV clinical data exports, in-app notifications (`/api/notifications`), audit logging. | `pytest tests/test_reports.py -v` | None | Proceed to Phase 10: App Launch & Demo Verification. |
 | **9** | **M4** | **Testing, Security & Performance** | **Deferred** | (Deferred per Today Mode scope) | - | - | Listed under Planned Work in README.md. |
-| **10** | **M4** | **Deployment & Documentation** | **Done** | End-to-end FastAPI backend + React PWA verified, 13/13 tests passing, demo accounts seeded, 5-step demo checklist documented. | `uvicorn backend.main:app` & `npm run dev` | None | Ready for internship demonstration and viva defense. |
+| **10** | **M4** | **Deployment & Documentation** | **Done** | End-to-end FastAPI backend + React PWA verified, Dockerfile and docker-compose.yml containerized, 13/13 tests passing, demo accounts seeded, 5-step demo checklist documented, GitHub repository sync ready. | `docker compose up -d` or `uvicorn backend.main:app` & `npm run dev` | None | Ready for internship demonstration, viva defense, and cloud deployment. |
 
 ---
 
-## 2. Phase 8 Gate Verification Results
+## 2. Phase Gate Verification Results
+- ML Inference: PyTorch EfficientNet-B0 inference with trained weights (`models/efficientnet_b0_best.pt`), Otsu lesion segmentation, Grad-CAM++ saliency heatmap generation, and `configs/risk_map.yaml` risk tiers verified.
 - ReportLab PDF export: `GET /api/cases/{id}/report.pdf` verified (valid PDF magic bytes `%PDF`, running headers/footers with mandatory disclaimer, clinical metadata, differential table, and embedded lesion morphology maps).
 - JSON export: `GET /api/cases/{id}/report.json` verified with complete patient profile and `"disclaimer": "AI-assisted analysis, not a standalone medical diagnosis."`.
 - CSV export: `GET /api/cases/{id}/report.csv` verified with tabular metrics.
 - Notification management: `GET /api/notifications`, `POST /api/notifications/{id}/read`, and `POST /api/notifications/read-all` verified.
-- Full test suite: `pytest tests/ -v` (13/13 tests passed in 6.66s across all modules).
+- Full test suite: `pytest tests/ -v` (13/13 tests passed across all modules).
 - Mandatory clinical disclaimer verified on every screen, API response, PDF report, and footer: `"AI-assisted analysis, not a standalone medical diagnosis."`
 
 

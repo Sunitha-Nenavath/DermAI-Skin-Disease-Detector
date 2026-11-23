@@ -81,7 +81,8 @@ lightning_logs/
 
 # --- Node.js & Web Frontend ---
 node_modules/
-npm-debug.log*
+dev-dist/
+dist/
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
