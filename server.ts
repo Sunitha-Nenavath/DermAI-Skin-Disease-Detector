@@ -80,16 +80,65 @@ function getSessionSecret(): string {
 
 const SESSION_SECRET = getSessionSecret();
 
+const DEFAULT_DEMO_ACCOUNTS: Array<{ email: string; pass: string; displayName: string; role: ValidRole }> = [
+  { email: 'clinician@dermai.local', pass: 'ClinicianDoctor123!', displayName: 'Dr. Sarah Chen, MD', role: 'clinician' },
+  { email: 'patient@dermai.local', pass: 'PatientSecure123!', displayName: 'John Doe (Patient)', role: 'patient' },
+  { email: 'admin@dermai.local', pass: 'AdminSuperUser123!', displayName: 'System Administrator', role: 'admin' },
+  { email: 'researcher@dermai.local', pass: 'ResearchScience123!', displayName: 'Prof. Elena Rostova', role: 'researcher' },
+  { email: 'ml_engineer@dermai.local', pass: 'MLEngineerModel123!', displayName: 'Marcus Aurelius (Lead ML)', role: 'ml_engineer' },
+];
+
+function ensureDefaultDemoUsers(users: StoredAuthUser[]): StoredAuthUser[] {
+  let changed = false;
+  for (const demo of DEFAULT_DEMO_ACCOUNTS) {
+    const existingIndex = users.findIndex(u => u.email.toLowerCase() === demo.email.toLowerCase());
+    const salt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = hashPassword(demo.pass, salt);
+    if (existingIndex < 0) {
+      users.push({
+        uid: `srv_${crypto.randomBytes(10).toString('hex')}`,
+        email: demo.email,
+        displayName: demo.displayName,
+        role: demo.role,
+        salt,
+        passwordHash,
+        createdAt: new Date().toISOString(),
+      });
+      changed = true;
+    } else {
+      const existing = users[existingIndex];
+      if (existing.role !== demo.role || !verifyPassword(demo.pass, existing.salt, existing.passwordHash)) {
+        users[existingIndex] = {
+          ...existing,
+          role: demo.role,
+          displayName: demo.displayName,
+          salt,
+          passwordHash,
+          updatedAt: new Date().toISOString(),
+        };
+        changed = true;
+      }
+    }
+  }
+  if (changed) {
+    writeAuthUsers(users);
+  }
+  return users;
+}
+
 function readAuthUsers(): StoredAuthUser[] {
   ensureDataDir();
-  if (!fs.existsSync(AUTH_USERS_FILE)) return [];
-  try {
-    const raw = fs.readFileSync(AUTH_USERS_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+  let users: StoredAuthUser[] = [];
+  if (fs.existsSync(AUTH_USERS_FILE)) {
+    try {
+      const raw = fs.readFileSync(AUTH_USERS_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) users = parsed;
+    } catch {
+      users = [];
+    }
   }
+  return ensureDefaultDemoUsers(users);
 }
 
 function writeAuthUsers(users: StoredAuthUser[]): void {
@@ -219,7 +268,16 @@ app.post('/api/auth/register', (req, res) => {
   writeAuthUsers(users);
 
   const token = signSessionToken(newUser.uid, newUser.email);
-  res.status(201).json({ token, user: toPublicUser(newUser) });
+  const pub = toPublicUser(newUser);
+  res.status(201).json({
+    token,
+    access_token: token,
+    user_id: newUser.uid,
+    email: newUser.email,
+    full_name: newUser.displayName,
+    role: newUser.role,
+    user: pub,
+  });
 });
 
 app.post('/api/auth/login', (req, res) => {
@@ -245,7 +303,16 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   const token = signSessionToken(found.uid, found.email);
-  res.json({ token, user: toPublicUser(found) });
+  const pub = toPublicUser(found);
+  res.json({
+    token,
+    access_token: token,
+    user_id: found.uid,
+    email: found.email,
+    full_name: found.displayName,
+    role: found.role,
+    user: pub,
+  });
 });
 
 app.get('/api/auth/me', (req, res) => {
@@ -254,7 +321,14 @@ app.get('/api/auth/me', (req, res) => {
     res.status(401).json({ error: 'Invalid or expired session token.' });
     return;
   }
-  res.json({ user: toPublicUser(found) });
+  const pub = toPublicUser(found);
+  res.json({
+    user: pub,
+    user_id: found.uid,
+    email: found.email,
+    full_name: found.displayName,
+    role: found.role,
+  });
 });
 
 app.patch('/api/auth/profile', (req, res) => {

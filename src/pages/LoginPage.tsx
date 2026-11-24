@@ -203,6 +203,62 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
+          {/* Quick 1-Click Fast Login */}
+          <div className="mb-5 p-3 bg-teal-50/70 rounded-xl border border-teal-200">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-teal-900 uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                1-Click Fast Access (Direct to Dashboard)
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true);
+                  setError(null);
+                  try {
+                    await login('clinician@dermai.local', 'ClinicianDoctor123!');
+                    navigate('/dashboard');
+                  } catch (err: any) {
+                    setError(formatFirebaseAuthError(err));
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="flex items-center gap-2 p-2 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:shadow-xs transition-all text-left"
+              >
+                <Stethoscope className="w-4 h-4 text-teal-600 shrink-0" />
+                <div>
+                  <div className="font-bold text-[#0B1F3A]">Doctor / Clinician</div>
+                  <div className="text-[10px] text-slate-500">All cases & PDF reports</div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true);
+                  setError(null);
+                  try {
+                    await login('patient@dermai.local', 'PatientSecure123!');
+                    navigate('/dashboard');
+                  } catch (err: any) {
+                    setError(formatFirebaseAuthError(err));
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="flex items-center gap-2 p-2 bg-white rounded-lg border border-teal-200 hover:border-teal-500 hover:shadow-xs transition-all text-left"
+              >
+                <User className="w-4 h-4 text-blue-600 shrink-0" />
+                <div>
+                  <div className="font-bold text-[#0B1F3A]">Patient Account</div>
+                  <div className="text-[10px] text-slate-500">Personal scan portal</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           {mode === 'signin' ? (
             <form className="space-y-4" onSubmit={handleSignIn}>
               <div>

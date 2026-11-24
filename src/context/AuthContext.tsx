@@ -157,10 +157,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
           if (res.ok) {
             const data = await res.json();
-            if (data?.user) {
-              setUser(data.user);
+            const usr = data?.user || (data?.email ? data : null);
+            if (usr) {
+              const restored: UserProfile = {
+                uid: String(usr.uid || usr.user_id || 'srv_user'),
+                email: usr.email,
+                displayName: usr.displayName || usr.full_name || usr.email.split('@')[0],
+                role: usr.role || 'clinician',
+                createdAt: usr.createdAt || new Date().toISOString(),
+              };
+              setUser(restored);
               setAuthProviderType('server');
-              localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(data.user));
+              localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(restored));
               setIsLoading(false);
               return;
             }
@@ -208,14 +216,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       err.code = data.code || 'auth/invalid-credential';
       throw err;
     }
+    const userObj = data.user || {};
     const profile: UserProfile = {
-      uid: String(data.user_id),
-      email: data.email,
-      displayName: data.full_name || data.email.split('@')[0],
-      role: data.role,
-      createdAt: new Date().toISOString(),
+      uid: String(data.user_id || userObj.uid || 'usr_' + Date.now()),
+      email: data.email || userObj.email || email,
+      displayName: data.full_name || userObj.displayName || (data.email || userObj.email || email).split('@')[0],
+      role: (data.role || userObj.role || 'clinician') as UserRole,
+      createdAt: userObj.createdAt || new Date().toISOString(),
     };
-    localStorage.setItem(SERVER_TOKEN_KEY, data.access_token);
+    const token = data.access_token || data.token;
+    if (token) {
+      localStorage.setItem(SERVER_TOKEN_KEY, token);
+    }
     if (data.refresh_token) {
       localStorage.setItem('dermai_refresh_token', data.refresh_token);
     }
@@ -242,14 +254,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       err.code = data.code || 'auth/register-failed';
       throw err;
     }
+    const userObj = data.user || {};
     const profile: UserProfile = {
-      uid: String(data.user_id),
-      email: data.email,
-      displayName: data.full_name || displayName,
-      role: data.role,
-      createdAt: new Date().toISOString(),
+      uid: String(data.user_id || userObj.uid || 'usr_' + Date.now()),
+      email: data.email || userObj.email || email,
+      displayName: data.full_name || userObj.displayName || displayName,
+      role: (data.role || userObj.role || role) as UserRole,
+      createdAt: userObj.createdAt || new Date().toISOString(),
     };
-    localStorage.setItem(SERVER_TOKEN_KEY, data.access_token);
+    const token = data.access_token || data.token;
+    if (token) {
+      localStorage.setItem(SERVER_TOKEN_KEY, token);
+    }
     if (data.refresh_token) {
       localStorage.setItem('dermai_refresh_token', data.refresh_token);
     }
