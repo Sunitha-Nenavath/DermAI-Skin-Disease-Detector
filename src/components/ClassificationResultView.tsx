@@ -34,8 +34,8 @@ export const ClassificationResultView: React.FC<ClassificationResultViewProps> =
   onRunInference,
   isRunning,
 }) => {
-  // If no prediction yet or in demo mode without remote model
-  const isDemoMode = !prediction || prediction.is_demo_mode;
+  // Only true demo mode if prediction explicitly returned is_demo_mode = true
+  const isDemoMode = Boolean(prediction?.is_demo_mode);
   const isLowConfidence = Boolean(prediction?.requires_clinical_review);
 
   const chartData =
@@ -51,10 +51,13 @@ export const ClassificationResultView: React.FC<ClassificationResultViewProps> =
   const getRiskTagBadge = (tag: string) => {
     switch (tag) {
       case 'High':
+      case 'High Risk':
         return 'bg-rose-100 text-rose-800 border-rose-300';
       case 'Moderate':
+      case 'Moderate Risk':
         return 'bg-amber-100 text-amber-800 border-amber-300';
       case 'Low':
+      case 'Low Risk':
         return 'bg-emerald-100 text-emerald-800 border-emerald-300';
       default:
         return 'bg-blue-100 text-blue-800 border-blue-300';
@@ -89,14 +92,40 @@ export const ClassificationResultView: React.FC<ClassificationResultViewProps> =
             className="px-4 py-2 bg-[#0E9F8E] hover:bg-[#0c8274] text-white text-xs font-semibold rounded-xl shadow-xs transition disabled:opacity-50 flex items-center gap-1.5"
           >
             <Activity className="w-3.5 h-3.5" />
-            <span>{isRunning ? 'Running Inference...' : 'Evaluate with Model'}</span>
+            <span>{isRunning ? 'Evaluating...' : prediction ? 'Re-evaluate with Model' : 'Evaluate with Model'}</span>
           </button>
         )}
       </div>
 
       <div className="p-6 space-y-6">
-        {/* DEMO MODE BANNER (When ML_SERVICE_URL is not connected) */}
-        {isDemoMode && (
+        {/* Ready to Screen State (When analysis hasn't been run yet) */}
+        {!prediction && (
+          <div className="p-5 bg-teal-50 border border-teal-200 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 text-teal-900 font-bold text-xs uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0" />
+                Trained PyTorch Model Ready (v1.0-efficientnet_b0)
+              </div>
+              {onRunInference && (
+                <button
+                  type="button"
+                  onClick={onRunInference}
+                  disabled={isRunning}
+                  className="px-4 py-2 bg-[#0E9F8E] hover:bg-[#0b7c6e] text-white text-xs font-bold rounded-xl shadow-sm transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>{isRunning ? 'Evaluating Lesion...' : 'Run Screening Now'}</span>
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-teal-800/90 leading-relaxed">
+              Trained EfficientNet-B0 model weights are loaded and ready. Click <strong>"Run Screening Now"</strong> to compute differential probabilities, Otsu lesion ROI, and Grad-CAM++ saliency overlays.
+            </p>
+          </div>
+        )}
+
+        {/* DEMO MODE BANNER (ONLY When remote model is disconnected or returns demo_mode) */}
+        {prediction && isDemoMode && (
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-2">
             <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
@@ -105,9 +134,6 @@ export const ClassificationResultView: React.FC<ClassificationResultViewProps> =
             <p className="text-xs text-amber-800/90 leading-relaxed">
               In accordance with clinical safety standards, this application never invents fake probabilities or synthetic disease labels. All client-side validation steps (resolution check, Laplacian blur, CLAHE contrast, color normalization, and classical Otsu lesion segmentation) are actively operating.
             </p>
-            <div className="pt-2 text-[11px] text-amber-950 font-mono">
-              To connect a trained PyTorch model server, specify the <code className="bg-amber-100 px-1 py-0.5 rounded font-bold">ML_SERVICE_URL</code> environment variable (or test via Settings).
-            </div>
           </div>
         )}
 

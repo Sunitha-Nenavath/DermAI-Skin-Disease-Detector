@@ -126,6 +126,11 @@ export const CaseDetailPage: React.FC = () => {
 
       const hist = await analysisService.listByCaseId(data.id);
       setAnalysesHistory(hist);
+
+      // Auto-trigger screening with connected PyTorch model if not yet evaluated
+      if (!data.latest_prediction && data.image_url) {
+        executeInference(data.image_url, data);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load clinical case record.');
     } finally {
